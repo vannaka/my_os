@@ -1,0 +1,82 @@
+# project LIBC : usage-requirements <include>./include ;
+#*********************************************************************
+#   INCLUDES
+#*********************************************************************
+
+#*********************************************************************
+#   GLOBAL CONSTANTS
+#*********************************************************************
+
+#*********************************************************************
+#   LOCAL CONSTANTS
+#*********************************************************************
+
+local INC_DIR = ./include ;
+
+#*********************************************************************
+#   PROJECT
+#*********************************************************************
+
+project LIBC : requirements <include>$(INC_DIR) ;
+
+#*********************************************************************
+#   TARGETS
+#*********************************************************************
+
+lib c
+    :
+    # Sources
+    [ glob stdio/*.c ]
+    [ glob stdlib/*.c ]
+    [ glob string/*.c ]
+    :
+    # Requirements
+    <link>static
+    <define>__is_libc
+    :
+    # Usage-requirements
+
+    ;
+explicit c ;
+
+lib k
+    :
+    # Sources
+    [ glob stdio/*.c ]
+    [ glob stdlib/*.c ]
+    [ glob string/*.c ]
+    :
+    # Requirements
+    <link>static
+    <define>__is_libk
+    <implicit-dependency>/KERNEL//install_headers
+    :
+    # Usage-requirements
+    
+    ;
+explicit k ;
+
+install install_headers
+    :
+    [ glob-tree *.h ]
+    :
+    <location>$(ABS_SYS_INC_DIR)
+    <install-source-root>$(INC_DIR)
+    ;
+explicit install_headers ;
+
+install install_libs
+    :
+    # c  # Not ready for use yet
+    k
+    :
+    <location>$(ABS_SYS_LIB_DIR)
+    ;
+explicit install_libs ;
+
+alias install
+    :
+    install_headers
+    install_libs
+    ;
+explicit install ;
