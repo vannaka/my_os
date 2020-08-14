@@ -17,3 +17,5 @@ Controls how libraries are built.
 feature.feature link
     : shared static
     : propagated ;
+
+feature.feature linkscript : : free dependency optional ;

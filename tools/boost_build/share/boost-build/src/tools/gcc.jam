@@ -888,6 +888,7 @@ toolset.flags gcc.link LINKPATH <library-path> ;
 toolset.flags gcc.link FINDLIBS-ST <find-static-library> ;
 toolset.flags gcc.link FINDLIBS-SA <find-shared-library> ;
 toolset.flags gcc.link LIBRARIES <library-file> ;
+toolset.flags gcc.link LINKSCRIPT <linkscript> : <linkscript> ;
 
 # Specify compile flags for linker as well as they may be needed for LTO
 toolset.flags gcc.link OPTIONS <local-visibility>hidden : -fvisibility=hidden -fvisibility-inlines-hidden ;
@@ -1101,6 +1102,8 @@ rule link ( targets * : sources * : properties * )
     # good idea to serialize all links.
     JAM_SEMAPHORE on $(targets) = <s>gcc-link-semaphore ;
     quote-rpath $(targets) ;
+
+    DEPENDS $(<) : [ on $(<) return $(LINKSCRIPT) ] ;
 }
 
 rule link.dll ( targets * : sources * : properties * )
@@ -1127,22 +1130,22 @@ rule link.dll.mingw ( targets * : sources * : properties * )
 
 actions link.mingw bind LIBRARIES
 {
-    "$(CONFIG_COMMAND)" -L"$(LINKPATH)" -o "$(<)" @"@($(<[1]:T).rsp:E=$(START-GROUP) "$(>:T)" "$(LIBRARIES:T)" $(FINDLIBS-ST-PFX:T) -l$(FINDLIBS-ST:T) $(FINDLIBS-SA-PFX:T) -l$(FINDLIBS-SA:T) $(END-GROUP))" $(OPTIONS) $(USER_OPTIONS)
+    "$(CONFIG_COMMAND)" -L"$(LINKPATH)" -o "$(<)" @"@($(<[1]:T).rsp:E=$(START-GROUP) "$(>:T)" "$(LIBRARIES:T)" $(FINDLIBS-ST-PFX:T) -l$(FINDLIBS-ST:T) $(FINDLIBS-SA-PFX:T) -l$(FINDLIBS-SA:T) $(END-GROUP))" $(OPTIONS) $(USER_OPTIONS) -T$(SPACE)$(LINKSCRIPT)
 }
 
 actions link.dll.mingw bind LIBRARIES
 {
-    "$(CONFIG_COMMAND)" -L"$(LINKPATH)" "$(.IMPLIB-COMMAND)$(<[1])" -o "$(<[-1])" -shared @"@($(<[-1]:T).rsp:E=$(START-GROUP) "$(>:T)" "$(LIBRARIES:T)" $(FINDLIBS-ST-PFX:T) -l$(FINDLIBS-ST:T) $(FINDLIBS-SA-PFX:T) -l$(FINDLIBS-SA:T) $(END-GROUP))" $(OPTIONS) $(USER_OPTIONS)
+    "$(CONFIG_COMMAND)" -L"$(LINKPATH)" "$(.IMPLIB-COMMAND)$(<[1])" -o "$(<[-1])" -shared @"@($(<[-1]:T).rsp:E=$(START-GROUP) "$(>:T)" "$(LIBRARIES:T)" $(FINDLIBS-ST-PFX:T) -l$(FINDLIBS-ST:T) $(FINDLIBS-SA-PFX:T) -l$(FINDLIBS-SA:T) $(END-GROUP))" $(OPTIONS) $(USER_OPTIONS) -T$(SPACE)$(LINKSCRIPT)
 }
 
-actions link bind LIBRARIES
+actions link bind LIBRARIES LINKSCRIPT
 {
-    "$(CONFIG_COMMAND)" -L"$(LINKPATH)" -Wl,$(RPATH_OPTION:E=-R)$(SPACE)-Wl,$(RPATH) -Wl,-rpath-link$(SPACE)-Wl,"$(RPATH_LINK)" -o "$(<)" $(START-GROUP) "$(>)" "$(LIBRARIES)" $(FINDLIBS-ST-PFX) -l$(FINDLIBS-ST) $(FINDLIBS-SA-PFX) -l$(FINDLIBS-SA) $(END-GROUP) $(OPTIONS) $(USER_OPTIONS)
+    "$(CONFIG_COMMAND)" -L"$(LINKPATH)" -Wl,$(RPATH_OPTION:E=-R)$(SPACE)-Wl,$(RPATH) -Wl,-rpath-link$(SPACE)-Wl,"$(RPATH_LINK)" -o "$(<)" $(START-GROUP) "$(>)" "$(LIBRARIES)" $(FINDLIBS-ST-PFX) -l$(FINDLIBS-ST) $(FINDLIBS-SA-PFX) -l$(FINDLIBS-SA) $(END-GROUP) $(OPTIONS) $(USER_OPTIONS) -T$(SPACE)$(LINKSCRIPT)
 }
 
 actions link.dll bind LIBRARIES
 {
-    "$(CONFIG_COMMAND)" -L"$(LINKPATH)" -Wl,$(RPATH_OPTION:E=-R)$(SPACE)-Wl,$(RPATH) "$(.IMPLIB-COMMAND)$(<[1])" -o "$(<[-1])" $(HAVE_SONAME)-Wl,$(SONAME_OPTION)$(SPACE)-Wl,$(<[-1]:D=) -shared $(START-GROUP) "$(>)" "$(LIBRARIES)" $(FINDLIBS-ST-PFX) -l$(FINDLIBS-ST) $(FINDLIBS-SA-PFX) -l$(FINDLIBS-SA) $(END-GROUP) $(OPTIONS) $(USER_OPTIONS)
+    "$(CONFIG_COMMAND)" -L"$(LINKPATH)" -Wl,$(RPATH_OPTION:E=-R)$(SPACE)-Wl,$(RPATH) "$(.IMPLIB-COMMAND)$(<[1])" -o "$(<[-1])" $(HAVE_SONAME)-Wl,$(SONAME_OPTION)$(SPACE)-Wl,$(<[-1]:D=) -shared $(START-GROUP) "$(>)" "$(LIBRARIES)" $(FINDLIBS-ST-PFX) -l$(FINDLIBS-ST) $(FINDLIBS-SA-PFX) -l$(FINDLIBS-SA) $(END-GROUP) $(OPTIONS) $(USER_OPTIONS) -T$(SPACE)$(LINKSCRIPT)
 }
 
 ###

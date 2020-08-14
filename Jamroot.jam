@@ -31,6 +31,7 @@ project MY_OS
     <toolset>gcc
     <target-os>elf  # elf is the bare metal target
     <cflags>-ffreestanding
+    # <cflags>-fdump-tree-all-graph # Dump AST as .dot file. View with graphviz
     <cflags>-isystem=$(SYS_INC_DIR)
     <cflags>--sysroot=$(SYS_ROOT)
     <linkflags>-isystem=$(SYS_INC_DIR)
