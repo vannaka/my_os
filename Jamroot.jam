@@ -34,12 +34,15 @@ project MY_OS
     # <cflags>-fdump-tree-all-graph # Dump AST as .dot file. View with graphviz
     <cflags>-isystem=$(SYS_INC_DIR)
     <cflags>--sysroot=$(SYS_ROOT)
+    <cflags>-std=c11
     <linkflags>-isystem=$(SYS_INC_DIR)
     <linkflags>--sysroot=$(SYS_ROOT)
     <linkflags>-ffreestanding
     <linkflags>-nostdlib
     <linkflags>-lgcc
     <variant>debug:<debug-symbols>on
+    <warnings>all
+    <warnings-as-errors>on
     :
     build-dir $(BUILD_DIR)
     :
@@ -53,6 +56,7 @@ project MY_OS
 #*********************************************************************
 use-project /KERNEL : src/kernel ;
 use-project /LIBC : src/libc ;
+use-project /ARCH/I386 : src/kernel/arch/i386 ;
 
 alias all
     :

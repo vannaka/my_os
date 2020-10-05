@@ -21,48 +21,36 @@ project KRNL : requirements <include>$(INC_DIR) ;
 #   TARGETS
 #*********************************************************************
 
+alias ARCH
+    :
+    /ARCH/I386//ARCH
+    :
+    <architecture>x86
+    ;
+
 exe kernel_bin
     :
     # Sources
-    arch/i386/boot.S
-    arch/i386/crti.S
-    arch/i386/crtn.S
-    arch/i386/tty.c
+    /ARCH/I386//CRT_START
 
+    ARCH
     kernel/kernel.c
+    
+    /ARCH/I386//CRT_END
 
-    # /LIBC//k # This should probably be referenced with the <library> feature.
+    [ lib k ]
     :
     # Requirements
-    # <architecture>x86:<linkflags>"-T $(TOP)/src/kernel/arch/i386/linker.ld"
-    <architecture>x86:<linkscript>arch/i386/linker.ld
+    <architecture>x86:<linkscript>/ARCH/I386//linker.ld
     <define>__is_kernel
-    <library>k  # libk
     <dependency>/LIBC//install # Required for access to headers since we use angled includes.
-    
-    # <crti>arch/i386/crti.S  # [Con/de]structor function headers here.
-    # <crtn>arch/i386/crtn.S  # [Con/de]structor function footers here.
     ;
 explicit kernel_bin ;
 
 
-
 #-----------------------------------------------------------
-# Discover crtend.o 
+# Make OS iso.
 #-----------------------------------------------------------
-actions discover-crtend-object
-{
-
-}
-
-
-#-----------------------------------------------------------
-# Use this target when you want to link to libk using the 
-# -l linker flag.  
-#-----------------------------------------------------------
-lib k ;
-explicit k ;
-
 make myos.iso : kernel_bin : @makeiso ;
 actions makeiso
 {
@@ -70,7 +58,9 @@ actions makeiso
 }
 explicit myos.iso ;
 
-
+#-----------------------------------------------------------
+# Install files in the SYS ROOT
+#-----------------------------------------------------------
 install install_headers
     :
     [ glob-tree *.h : vga.h ]
