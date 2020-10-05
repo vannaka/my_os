@@ -1,5 +1,19 @@
 #include <stdio.h>
 
-int puts(const char* string) {
-	return printf("%s\n", string);
-}
+/*********************************************************************
+*
+*  	PROCEDURE NAME:
+*      puts
+*
+*  	DESCRIPTION:
+*      	Write string to standard output.
+*
+*********************************************************************/
+int puts
+	(
+	const char * 		string		/* String to write to stdio 	*/
+	)
+	{
+	return printf( "%s\n", string );
+	
+	} /* puts() */

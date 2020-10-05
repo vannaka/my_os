@@ -1,3 +1,17 @@
+/*********************************************************************
+*
+*	MODULE:
+*		i386/tty.c
+*
+*	DESCRIPTION:
+*		x86 tty terminal driver
+*
+*********************************************************************/
+
+/*--------------------------------------------------------------------
+                              INCLUDES
+--------------------------------------------------------------------*/
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -7,52 +21,206 @@
 
 #include "vga.h"
 
-static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 25;
-static uint16_t* const VGA_MEMORY = (uint16_t*) 0xB8000;
+/*--------------------------------------------------------------------
+                          LITERAL CONSTANTS
+--------------------------------------------------------------------*/
 
-static size_t terminal_row;
-static size_t terminal_column;
-static uint8_t terminal_color;
-static uint16_t* terminal_buffer;
+#define VGA_WIDTH   80
+#define VGA_HEIGHT  25
+#define VGA_MEMORY  0xB8000;
 
-void terminal_initialize(void) {
-	terminal_row = 0;
-	terminal_column = 0;
-	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
-	terminal_buffer = VGA_MEMORY;
-	for (size_t y = 0; y < VGA_HEIGHT; y++) {
-		for (size_t x = 0; x < VGA_WIDTH; x++) {
-			const size_t index = y * VGA_WIDTH + x;
-			terminal_buffer[index] = vga_entry(' ', terminal_color);
-		}
-	}
-}
+/*--------------------------------------------------------------------
+                                TYPES
+--------------------------------------------------------------------*/
 
-void terminal_setcolor(uint8_t color) {
-	terminal_color = color;
-}
+/*--------------------------------------------------------------------
+                          MEMORY CONSTANTS
+--------------------------------------------------------------------*/
 
-void terminal_putentryat(unsigned char c, uint8_t color, size_t x, size_t y) {
-	const size_t index = y * VGA_WIDTH + x;
-	terminal_buffer[index] = vga_entry(c, color);
-}
+/*--------------------------------------------------------------------
+                              VARIABLES
+--------------------------------------------------------------------*/
 
-void terminal_putchar(char c) {
-	unsigned char uc = c;
-	terminal_putentryat(uc, terminal_color, terminal_column, terminal_row);
-	if (++terminal_column == VGA_WIDTH) {
-		terminal_column = 0;
-		if (++terminal_row == VGA_HEIGHT)
-			terminal_row = 0;
-	}
-}
+static size_t       terminal_row;
+static size_t       terminal_column;
+static uint8_t      terminal_color;
+static uint16_t *   terminal_buffer;
 
-void terminal_write(const char* data, size_t size) {
-	for (size_t i = 0; i < size; i++)
-		terminal_putchar(data[i]);
-}
+/*--------------------------------------------------------------------
+                               MACROS
+--------------------------------------------------------------------*/
 
-void terminal_writestring(const char* data) {
-	terminal_write(data, strlen(data));
-}
+/*--------------------------------------------------------------------
+                             PROCEDURES
+--------------------------------------------------------------------*/
+
+/*********************************************************************
+*
+*  	PROCEDURE NAME:
+*      terminal_initialize
+*
+*  	DESCRIPTION:
+*      	Init tty terminal interface
+*
+*********************************************************************/
+void terminal_initialize
+    (
+    void
+    )
+    {
+    /*------------------------------------------------------
+    Init module state vars
+    ------------------------------------------------------*/
+    terminal_row = 0;
+    terminal_column = 0;
+    terminal_color = vga_entry_color( VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK );
+    terminal_buffer = (uint16_t*)VGA_MEMORY;
+
+    /*------------------------------------------------------
+    Clear screen
+    ------------------------------------------------------*/
+    for( size_t y = 0; y < VGA_HEIGHT; y++ )
+        {
+        for( size_t x = 0; x < VGA_WIDTH; x++ )
+            {
+            const size_t index = y * VGA_WIDTH + x;
+            terminal_buffer[ index ] = vga_entry( ' ', terminal_color );
+            }
+        }
+    } /* terminal_initialize() */
+
+
+/*********************************************************************
+*
+*  	PROCEDURE NAME:
+*      terminal_setcolor
+*
+*  	DESCRIPTION:
+*      	Set the color of the terminal
+*
+*********************************************************************/
+void terminal_setcolor
+    (
+    uint8_t             color       /* Color for future term chars  */
+    )
+    {
+    terminal_color = color;
+
+    } /* terminal_setcolor() */
+
+
+/*********************************************************************
+*
+*  	PROCEDURE NAME:
+*      terminal_putentryat
+*
+*  	DESCRIPTION:
+*      	Put char at x,y char coordinate of terminal.
+*
+*********************************************************************/
+void terminal_putentryat
+    (
+    unsigned char 		c, 			/* Char to write to term		*/
+    uint8_t 			color, 		/* Color of char				*/
+    size_t 				x, 			/* x coordinate					*/
+    size_t 				y			/* y coordinate					*/
+    )
+    {
+    /*------------------------------------------------------
+    Local Variables
+    ------------------------------------------------------*/
+    const size_t index = y * VGA_WIDTH + x;
+    
+    /*------------------------------------------------------
+    Write char to screen
+    ------------------------------------------------------*/
+    terminal_buffer[ index ] = vga_entry( c, color );
+
+    } /* terminal_putentryat() */
+
+
+/*********************************************************************
+*
+*  	PROCEDURE NAME:
+*      terminal_putchar
+*
+*  	DESCRIPTION:
+*      	Put char at cursor.
+*
+*********************************************************************/
+void terminal_putchar
+    (
+    char 				c			/* char to write to term		*/
+    )
+    {
+    /*------------------------------------------------------
+    Local Variables
+    ------------------------------------------------------*/
+    unsigned char uc = c;
+    
+    /*------------------------------------------------------
+    Put char at cursor
+    ------------------------------------------------------*/
+    terminal_putentryat( uc, terminal_color, terminal_column, terminal_row );
+
+    /*------------------------------------------------------
+    Update cursor position
+    ------------------------------------------------------*/
+    if( ++terminal_column == VGA_WIDTH )
+        {
+        terminal_column = 0;
+        
+        if( ++terminal_row == VGA_HEIGHT )
+            {
+            terminal_row = 0;
+            }
+        }
+    } /* terminal_putchar () */
+
+
+/*********************************************************************
+*
+*  	PROCEDURE NAME:
+*      terminal_initialize
+*
+*  	DESCRIPTION:
+*      	Write string of chars to terminal.
+*
+*********************************************************************/
+void terminal_write
+    (
+    const char *        data, 		/* String to write to term		*/
+    size_t 				size		/* Number of chars to write		*/
+    )
+    {
+    /*------------------------------------------------------
+    Write chars to terminal
+    ------------------------------------------------------*/
+    for( size_t i = 0; i < size; i++ )
+        {
+        terminal_putchar( data[ i ] );
+        }
+
+    } /* terminal_write() */
+
+
+/*********************************************************************
+*
+*  	PROCEDURE NAME:
+*      terminal_writestring
+*
+*  	DESCRIPTION:
+*      	Write null terminated string to terminal
+*
+*********************************************************************/
+void terminal_writestring
+    (
+    const char *        data        /* Null terminated string       */
+    )
+    {
+    /*------------------------------------------------------
+    Write string to terminal
+    ------------------------------------------------------*/
+    terminal_write( data, strlen( data ) );
+
+    } /* terminal_writestring() */
