@@ -25,6 +25,7 @@ project LIBC : requirements <include>$(INC_DIR) ;
 lib c
     :
     # Sources
+    [ glob ctype/*.c ]
     [ glob stdio/*.c ]
     [ glob stdlib/*.c ]
     [ glob string/*.c ]
@@ -41,6 +42,7 @@ explicit c ;
 lib k
     :
     # Sources
+    [ glob ctype/*.c ]
     [ glob stdio/*.c ]
     [ glob stdlib/*.c ]
     [ glob string/*.c ]

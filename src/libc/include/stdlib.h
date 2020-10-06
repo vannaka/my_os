@@ -51,6 +51,13 @@ void abort
     void
     );
 
+char * itoa
+    (
+    int                 value, 
+    char *              result,
+    int                 base 
+    );
+
 #ifdef __cplusplus
 }
 #endif

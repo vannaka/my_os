@@ -12,10 +12,13 @@
 							   INCLUDES
 --------------------------------------------------------------------*/
 
+#include <ctype.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 /*--------------------------------------------------------------------
@@ -65,6 +68,9 @@ int printf
 	...								/* Args to format into output	*/
 	)
 	{
+	char buf[ 33 ];
+	size_t len;
+	
 	va_list parameters;
 	va_start( parameters, format );
 
@@ -107,7 +113,6 @@ int printf
 
 		if( *format == 'c' )
 			{
-			format++;
 			char c = (char)va_arg( parameters, int /* char promotes to int */ );
 			
 			if( !maxrem )
@@ -120,13 +125,14 @@ int printf
 				{
 				return -1;
 				}
+			
+			format++;
 			written++;
 			}
 		else if( *format == 's' )
 			{
-			format++;
 			const char * str = va_arg( parameters, const char * );
-			size_t len = strlen( str );
+			len = strlen( str );
 			
 			if( maxrem < len )
 				{
@@ -138,7 +144,70 @@ int printf
 				return -1;
 				}
 			
+			format++;
 			written += len;
+			}
+		else if( *format == 'd' 
+			  || *format == 'i' )
+			{
+			int num = (int)va_arg( parameters, int );
+						
+			/*------------------------------------------------------
+			itoa needs at least 33 bytes for every possible value.
+			------------------------------------------------------*/
+			if( sizeof( buf ) < 33 )
+				{
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+				}
+			
+			itoa( num, buf, 10 );
+			
+			len = strlen( buf );
+			
+			if( !print( buf, len ) )
+				{
+				return -1;
+				}
+			
+			format++;
+			written += len;
+			
+			}
+		else if( *format == 'x'
+			  || *format == 'X' )
+			{
+			uint32_t num = (int)va_arg( parameters, uint32_t );
+
+			/*------------------------------------------------------
+			itoa needs at least 33 bytes for every possible value.
+			------------------------------------------------------*/
+			if( sizeof( buf ) < 33 )
+				{
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+				}
+
+			itoa( num, buf, 16 );
+
+			len = strlen( buf );
+
+			if( *format == 'X' )
+				{
+				for( size_t i = 0; i < len; i++ )
+					{
+					buf[ i ] = toupper( buf[ i ] );
+					}
+				}	
+			
+			if( !print( buf, len ) )
+				{
+				return -1;
+				}
+
+			format++;
+			written += len;
+
 			}
 		else
 			{
