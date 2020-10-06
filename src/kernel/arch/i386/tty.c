@@ -33,6 +33,13 @@
                                 TYPES
 --------------------------------------------------------------------*/
 
+enum update_type
+    {
+    UPDT_ONE,
+    UPDT_TAB,
+    UPDT_NEW_LINE
+    };
+
 /*--------------------------------------------------------------------
                           MEMORY CONSTANTS
 --------------------------------------------------------------------*/
@@ -53,6 +60,16 @@ static uint16_t *   terminal_buffer;
 /*--------------------------------------------------------------------
                              PROCEDURES
 --------------------------------------------------------------------*/
+
+void updt_cursor
+    (
+    enum update_type    updt_type
+    );
+
+bool hndl_spcl_chars
+    (
+    uint8_t             c
+    );
 
 /*********************************************************************
 *
@@ -159,6 +176,12 @@ void terminal_putchar
     unsigned char uc = c;
     
     /*------------------------------------------------------
+    If char is special, handle is and return.
+    ------------------------------------------------------*/
+    if( hndl_spcl_chars( uc ) )
+        return;
+    
+    /*------------------------------------------------------
     Put char at cursor
     ------------------------------------------------------*/
     terminal_putentryat( uc, terminal_color, terminal_column, terminal_row );
@@ -166,15 +189,8 @@ void terminal_putchar
     /*------------------------------------------------------
     Update cursor position
     ------------------------------------------------------*/
-    if( ++terminal_column == VGA_WIDTH )
-        {
-        terminal_column = 0;
-        
-        if( ++terminal_row == VGA_HEIGHT )
-            {
-            terminal_row = 0;
-            }
-        }
+    updt_cursor( UPDT_ONE );
+    
     } /* terminal_putchar () */
 
 
@@ -224,3 +240,90 @@ void terminal_writestring
     terminal_write( data, strlen( data ) );
 
     } /* terminal_writestring() */
+
+
+/*********************************************************************
+*
+*   PROCEDURE NAME:
+*       move_cursor
+*
+*   DESCRIPTION:
+*       Move cursor
+*
+*********************************************************************/
+void updt_cursor
+    (
+    enum update_type    updt_type
+    )
+    {
+    switch( updt_type )
+        {
+        case UPDT_ONE:
+            if( ++terminal_column == VGA_WIDTH )
+                {
+                terminal_column = 0;
+
+                if( ++terminal_row == VGA_HEIGHT )
+                    {
+                    terminal_row = 0;
+                    }
+                }
+            break;
+        case UPDT_NEW_LINE:
+            terminal_column = 0;
+            
+            if( ++terminal_row == VGA_HEIGHT )
+                {
+                terminal_row = 0;
+                }
+            break;
+            
+        case UPDT_TAB:
+            if( terminal_column += 4 == VGA_WIDTH )
+                {
+                terminal_column = 0;
+                }
+            break;
+            
+        default:
+            // TODO: THIS SHOULD NOT BE HIT. How do I want to handel cases like this. I need a logging function.
+            break;
+        }
+    } /* move_cursor() */
+
+
+/*********************************************************************
+*
+*   PROCEDURE NAME:
+*       hndl_spcl_chars
+*
+*   DESCRIPTION:
+*       Move the cursor for special characters. Returns true if the
+*       char was handled and shouldn't be written to the terminal.
+*
+*********************************************************************/
+bool hndl_spcl_chars
+    (
+    uint8_t c
+    )
+    {
+    bool ret = true;
+    
+    switch( c )
+        {
+        case '\n':
+            updt_cursor( UPDT_NEW_LINE );
+            break;
+        
+        case '\t':
+            updt_cursor( UPDT_TAB );
+            break;
+            
+        default:
+            ret = false;
+            break;
+        }
+    
+    return ret;
+    
+    } /* hndl_spcl_chars() */
