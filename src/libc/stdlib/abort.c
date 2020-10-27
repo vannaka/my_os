@@ -45,7 +45,7 @@
 *       abort
 *
 *   DESCRIPTION:
-*       C entry point of kernel
+*       Abort execution
 *
 *********************************************************************/
 __attribute__( ( __noreturn__ ) )
