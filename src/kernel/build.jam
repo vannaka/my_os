@@ -41,7 +41,7 @@ exe kernel_bin
     [ lib k ]
     :
     # Requirements
-    <architecture>x86:<linkscript>/ARCH/I386//linker.ld
+    <use>ARCH
     <define>__is_kernel
     <dependency>/LIBC//install # Required for access to headers since we use angled includes.
     ;

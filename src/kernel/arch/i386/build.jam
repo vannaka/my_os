@@ -23,6 +23,11 @@ alias ARCH
     :
     boot.S
     tty.c
+    :
+    :
+    :
+    # Usage Requirements
+    <linkscript>linker.ld
     ;
 
 #-----------------------------------------------------------
@@ -45,6 +50,9 @@ obj crtn.o : crtn.S ;
 
 #-----------------------------------------------------------
 # Make boost aware of crt objects provided by gcc
+# 
+# TODO: I should not be invoking gcc directly here. I should
+#   instead add support to the boost gcc.jam module.
 #-----------------------------------------------------------
 make crtbegin.o : : @copy_crtbegin ;
 actions copy_crtbegin
