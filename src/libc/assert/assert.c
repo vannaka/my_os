@@ -1,31 +1,23 @@
 /*********************************************************************
 *
 *   MODULE:
-*       assert.h
+*       assert.c
 *
 *   DESCRIPTION:
-*       Diagnostics
+*       Assert implementation
 *
 *********************************************************************/
-
-#ifndef _ASSERT_H
-#define _ASSERT_H
 
 /*--------------------------------------------------------------------
                                INCLUDES
 --------------------------------------------------------------------*/
 
-#include <feature.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
 --------------------------------------------------------------------*/
-
-#if defined __USE_ISOC11 && !defined __cplusplus
-# undef static_assert
-# define static_assert _Static_assert
-#endif
 
 /*--------------------------------------------------------------------
                                 TYPES
@@ -35,41 +27,36 @@
                            MEMORY CONSTANTS
 --------------------------------------------------------------------*/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*--------------------------------------------------------------------
-                                VARIABLES
+                              VARIABLES
 --------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------
                                 MACROS
 --------------------------------------------------------------------*/
 
-#ifdef NDEBUG
-#define assert(condition) ((void)0)
-
-#else
-    
-extern void _assert( const char * condition, const char * file, unsigned int line, const char * func );
-
-#define assert( condition )                         \
-    do  {                                           \
-        if( !(condition) )                          \
-            {                                       \
-            _assert( #condition, __FILE__, __LINE__, __func__ ); \
-            }                                       \  
-        }                                           \
-    while(0)
-
-#endif /* NDEBUG */
-
 /*--------------------------------------------------------------------
                               PROCEDURES
 --------------------------------------------------------------------*/
 
-#ifdef __cplusplus
-}
-#endif
-#endif /* _ASSERT_H */
+/*********************************************************************
+*
+*   PROCEDURE NAME:
+*       _assert
+*
+*   DESCRIPTION:
+*       Send assert message to stderror and abort.
+*
+*********************************************************************/
+void _assert
+    (
+    const char *        condition,
+    const char *        file,
+    unsigned int        line,
+    const char *        func
+    )
+    {
+    printf( "%s:%d: %s: Assertion '%s' failed.\n", file, line, func, condition );
+    abort();
+    
+    } /* _assert() */

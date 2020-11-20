@@ -42,6 +42,7 @@ explicit c ;
 lib k
     :
     # Sources
+    [ glob assert/*.c ]
     [ glob ctype/*.c ]
     [ glob stdio/*.c ]
     [ glob stdlib/*.c ]

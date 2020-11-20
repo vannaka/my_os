@@ -1,30 +1,34 @@
 /*********************************************************************
 *
 *   MODULE:
-*       assert.h
+*       feature.h
 *
 *   DESCRIPTION:
-*       Diagnostics
+*       Macros to enable features of the library.
 *
 *********************************************************************/
 
-#ifndef _ASSERT_H
-#define _ASSERT_H
+#ifndef _FEATURE_H
+#define _FEATURE_H
 
 /*--------------------------------------------------------------------
                                INCLUDES
 --------------------------------------------------------------------*/
 
-#include <feature.h>
-#include <stdlib.h>
-
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
 --------------------------------------------------------------------*/
 
-#if defined __USE_ISOC11 && !defined __cplusplus
-# undef static_assert
-# define static_assert _Static_assert
+/* This is to enable the ISO C11 extension.  */
+#if (defined _ISOC11_SOURCE \
+     || (defined __STDC_VERSION__ && __STDC_VERSION__ >= 201112L))
+# define __USE_ISOC11	1
+#endif
+
+/* This is to enable the ISO C99 extension.  */
+#if (defined _ISOC99_SOURCE || defined _ISOC11_SOURCE \
+     || (defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L))
+# define __USE_ISOC99	1
 #endif
 
 /*--------------------------------------------------------------------
@@ -40,30 +44,12 @@ extern "C" {
 #endif
 
 /*--------------------------------------------------------------------
-                                VARIABLES
+                              VARIABLES
 --------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------
                                 MACROS
 --------------------------------------------------------------------*/
-
-#ifdef NDEBUG
-#define assert(condition) ((void)0)
-
-#else
-    
-extern void _assert( const char * condition, const char * file, unsigned int line, const char * func );
-
-#define assert( condition )                         \
-    do  {                                           \
-        if( !(condition) )                          \
-            {                                       \
-            _assert( #condition, __FILE__, __LINE__, __func__ ); \
-            }                                       \  
-        }                                           \
-    while(0)
-
-#endif /* NDEBUG */
 
 /*--------------------------------------------------------------------
                               PROCEDURES
@@ -72,4 +58,4 @@ extern void _assert( const char * condition, const char * file, unsigned int lin
 #ifdef __cplusplus
 }
 #endif
-#endif /* _ASSERT_H */
+#endif /* _FEATURE_H */
