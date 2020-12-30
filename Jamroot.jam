@@ -10,13 +10,13 @@ path-constant ARTFCTS_DIR : ../artifacts ;
 path-constant BUILD_DIR : ../bin ;
 path-constant SYS_ROOT : ../sysroot ;
 
-constant SYS_INC_DIR : /usr/include ;
-constant SYS_LIB_DIR : /usr/lib ;
-constant SYS_BOOT_DIR : /boot ;
+constant SYS_INC_DIR : usr/include ;
+constant SYS_LIB_DIR : usr/lib ;
+constant SYS_BOOT_DIR : boot ;
 
-path-constant ABS_SYS_INC_DIR : $(SYS_ROOT)$(SYS_INC_DIR) ;
-path-constant ABS_SYS_LIB_DIR : $(SYS_ROOT)$(SYS_LIB_DIR) ;
-path-constant ABS_SYS_BOOT_DIR : $(SYS_ROOT)$(SYS_BOOT_DIR) ;
+path-constant ABS_SYS_INC_DIR : $(SYS_ROOT)/$(SYS_INC_DIR) ;
+path-constant ABS_SYS_LIB_DIR : $(SYS_ROOT)/$(SYS_LIB_DIR) ;
+path-constant ABS_SYS_BOOT_DIR : $(SYS_ROOT)/$(SYS_BOOT_DIR) ;
 
 #*********************************************************************
 #   LOCAL CONSTANTS
@@ -30,12 +30,12 @@ project MY_OS
     requirements
     <toolset>gcc
     <target-os>elf  # elf is the bare metal target
+    <link>static
     <cflags>-ffreestanding
     # <cflags>-fdump-tree-all-graph # Dump AST as .dot file. View with graphviz
-    <cflags>-isystem=$(SYS_INC_DIR)
+    <cflags>-isystem\"$(ABS_SYS_INC_DIR)\"
     <cflags>--sysroot=$(SYS_ROOT)
     <cflags>-std=c11
-    <linkflags>-isystem=$(SYS_INC_DIR)
     <linkflags>--sysroot=$(SYS_ROOT)
     <linkflags>-ffreestanding
     <linkflags>-nostdlib
