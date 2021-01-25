@@ -84,7 +84,7 @@ explicit myos.iso ;
 #-----------------------------------------------------------
 install install_headers
     :
-    [ glob-tree *.h : vga.h ]
+    [ glob-tree *.h : arch ]
     :
     <location>$(ABS_SYS_INC_DIR)
     <install-source-root>$(INC_DIR)

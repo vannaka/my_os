@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <kernel/tty.h>
+#include <kernel/tty/tty.h>
 
 #include <screen/vga.h>
 
