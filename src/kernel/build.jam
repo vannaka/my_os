@@ -15,7 +15,12 @@ local INC_DIR = ./include ;
 #*********************************************************************
 #   PROJECT
 #*********************************************************************
-project KRNL : requirements <include>$(INC_DIR) ;
+project KRNL 
+    : 
+    requirements 
+    <include>$(INC_DIR)
+    <dependency>/LIBC//install_headers # Required for access to headers since we use angled includes.
+    ;
 
 #*********************************************************************
 #   TARGETS
@@ -23,21 +28,21 @@ project KRNL : requirements <include>$(INC_DIR) ;
 
 alias ARCH
     :
-    /ARCH/I386//ARCH
+    arch/i386//ARCH
     :
     <architecture>x86
     ;
 
 alias ARCH_CRT_BEGIN
     :
-    /ARCH/I386//CRT_START
+    arch/i386/gcc//CRT_START
     :
     <architecture>x86
     ;
 
 alias ARCH_CRT_END
     :
-    /ARCH/I386//CRT_END
+    arch/i386/gcc//CRT_END
     :
     <architecture>x86
     ;

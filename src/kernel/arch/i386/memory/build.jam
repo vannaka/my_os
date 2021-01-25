@@ -10,26 +10,18 @@
 #   LOCAL CONSTANTS
 #*********************************************************************
 
-local INC_DIR = ./include ;
-
 #*********************************************************************
 #   PROJECT
 #*********************************************************************
-
-project ARCH_X86 : requirements <include>$(INC_DIR) ;
 
 #*********************************************************************
 #   TARGETS
 #*********************************************************************
 
-alias ARCH
+lib MEMORY
     :
-    boot//BOOT
-    tty//TTY
-    memory//MEMORY
+    memory.c
+    gdt//GDT
     :
-    :
-    :
-    # Usage Requirements
-    <linkscript>linker.ld
+    <link>static
     ;

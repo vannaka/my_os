@@ -56,7 +56,7 @@ project MY_OS
 #*********************************************************************
 use-project /KERNEL : src/kernel ;
 use-project /LIBC : src/libc ;
-use-project /ARCH/I386 : src/kernel/arch/i386 ;
+# use-project /ARCH/I386 : src/kernel/arch/i386 ;
 
 alias all
     :

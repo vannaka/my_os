@@ -19,7 +19,7 @@
 
 #include <kernel/tty.h>
 
-#include "vga.h"
+#include <screen/vga.h>
 
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
