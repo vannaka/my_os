@@ -10,28 +10,29 @@
 #   LOCAL CONSTANTS
 #*********************************************************************
 
-local INC_DIR = ./include ;
-
 #*********************************************************************
 #   PROJECT
 #*********************************************************************
-
-project ARCH_X86 : requirements <include>$(INC_DIR) ;
 
 #*********************************************************************
 #   TARGETS
 #*********************************************************************
 
-alias ARCH
+lib IDT
     :
-    boot//BOOT
-    tty//TTY
-    memory//MEMORY
-    interrupts//IDT
-    interrupts//HNDLRS
+    idt_asm.S
+    idt.c
     :
+    <link>static
+    ;
+
+lib HNDLRS
     :
+    intr_handlers.c
     :
-    # Usage Requirements
-    <linkscript>linker.ld
+    # Since GCC doesn’t preserve SSE, MMX nor x87 states, 
+    #   the GCC option -mgeneral-regs-only should be used 
+    #   to compile interrupt and exception handlers.
+    <cflags>-mgeneral-regs-only
+    <link>static
     ;

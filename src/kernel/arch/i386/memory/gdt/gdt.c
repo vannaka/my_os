@@ -23,8 +23,9 @@
 
 #define GDT_ENTRIES		5
 
-// Each define here is for a specific flag in the descriptor.
-// Refer to the intel documentation for a description of what each one does.
+/*----------------------------------------------------------
+Descriptor flags
+----------------------------------------------------------*/
 #define SEG_DESCTYPE(x)  ((x) << 0x04) // Descriptor type (0 for system, 1 for code/data)
 #define SEG_PRES(x)      ((x) << 0x07) // Present
 #define SEG_SAVL(x)      ((x) << 0x0C) // Available for system use
@@ -32,7 +33,6 @@
 #define SEG_SIZE(x)      ((x) << 0x0E) // Size (0 for 16-bit, 1 for 32)
 #define SEG_GRAN(x)      ((x) << 0x0F) // Granularity (0 for 1B - 1MB, 1 for 4KB - 4GB)
 #define SEG_PRIV(x)     (((x) &  0x03) << 0x05)   // Set privilege level (0 - 3)
- 
 #define SEG_DATA_RD        0x00 // Read-Only
 #define SEG_DATA_RDA       0x01 // Read-Only, accessed
 #define SEG_DATA_RDWR      0x02 // Read/Write
@@ -49,7 +49,10 @@
 #define SEG_CODE_EXCA      0x0D // Execute-Only, conforming, accessed
 #define SEG_CODE_EXRDC     0x0E // Execute/Read, conforming
 #define SEG_CODE_EXRDCA    0x0F // Execute/Read, conforming, accessed
- 
+
+/*----------------------------------------------------------
+Flags for each GDT entry
+----------------------------------------------------------*/
 #define FLAGS_CODE_KERNEL \
     ( SEG_DESCTYPE(1) | SEG_PRES(1) | SEG_SAVL(0) | \
       SEG_LONG(0)     | SEG_SIZE(1) | SEG_GRAN(1) | \
@@ -78,25 +81,25 @@
 /* 8 byte segment descriptor */
 struct desc_struct 
     {
-    uint16_t            limit0;
-    uint16_t            base0;
-    uint16_t            base1: 8, 
-                        type: 4, 
-                        s: 1, 
-                        dpl: 2, 
-                        p: 1;
-    uint16_t            limit1: 4, 
-                        avl: 1, 
-                        l: 1, 
-                        d: 1, 
-                        g: 1, 
-                        base2: 8;
+    uint16_t            limit0;     /* Limit bits 0..15             */
+    uint16_t            base0;      /* Base bits 0..15              */
+    uint16_t            base1: 8,   /* Base bits 16..23             */
+                        type: 4,    /* RW?/Direction/Exec?          */
+                        s: 1,       /* Descriptor type              */
+                        dpl: 2,     /* Privilege - Ring level       */
+                        p: 1;       /* Present?                     */
+    uint16_t            limit1: 4,  /* Limit bits 16:19             */
+                        avl: 1,     /* Avail for sys use?           */
+                        l: 1,       /* Long mode?                   */
+                        d: 1,       /* 16/32 mode?                  */
+                        g: 1,       /* 1B or 4KB granularity?       */
+                        base2: 8;   /* Base bits 24..31             */
     } __attribute__((packed));
 
 struct desc_ptr 
     {
-	uint16_t            size;
-	uint32_t            address;
+	uint16_t            size;       /* Addr + size = last byte      */
+	uint32_t            address;    /* Virtual address              */
     } __attribute__((packed));
 
 /*--------------------------------------------------------------------
