@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include <interrupts/idt.h>
 
@@ -58,5 +59,5 @@ void dflt_intr_hndlr
                         frame
     )
     {
-    assert( true );
+    printf("\nHello from the default interrupt handler!\n");
     } /* dflt_hndlr() */

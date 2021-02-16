@@ -52,5 +52,6 @@
 .global do_install_idt
 .type do_install_idt, @function
 do_install_idt:
-   movl 4(%esp), %eax
-   lidt (%eax)
+    movl 4(%esp), %eax
+    lidt (%eax)
+    ret

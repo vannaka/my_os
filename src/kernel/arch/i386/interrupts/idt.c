@@ -38,7 +38,7 @@ Privilege level
 Attributes
 ----------------------------------------------------------*/
 #define PRES( x )  ( ( x ) << 0x07 )
-#define PRIV( x )  ( ( ( x ) & 0x04 ) << 0x05 )
+#define PRIV( x )  ( ( ( x ) & 0x03 ) << 0x05 )
 #define SEGM( x )  ( ( x ) << 0x04 )
 
 /*----------------------------------------------------------
@@ -107,7 +107,7 @@ static struct desc_struct idt[ MAX_IDT_ENTRIES ];
 static struct desc_ptr idt_ptr =
     {
     .size = sizeof(idt) - 1,
-    .address = (uint32_t)&idt
+    .address = (uint32_t)idt
     };
 
 

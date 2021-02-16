@@ -83,6 +83,8 @@ void kernel_main
 	printf( "Num: %d\n", 25 );
 	printf( "addr== 0x%X\n", &kernel_main );
 	
-	assert( x == 0 );
+	__asm__ ("int $0x0E");
 	
+	assert( x == 0 );
+
 	} /* kernel_main() */
