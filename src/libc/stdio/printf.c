@@ -188,7 +188,7 @@ int printf
 				return -1;
 				}
 
-			itoa( num, buf, 16 );
+			utoa( num, buf, 16 );
 
 			len = strlen( buf );
 

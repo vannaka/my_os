@@ -56,7 +56,7 @@ void _assert
     const char *        func
     )
     {
-    printf( "%s:%d: %s: Assertion '%s' failed.\n", file, line, func, condition );
+    printf( "\n%s:%d: %s: Assertion '%s' failed.\n", file, line, func, condition );
     abort();
     
     } /* _assert() */

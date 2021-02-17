@@ -1,21 +1,18 @@
 /*********************************************************************
 *
 *   MODULE:
-*       stdlib.h
+*       utoa.c
 *
 *   DESCRIPTION:
-*       Standard library declarations
+*       
 *
 *********************************************************************/
-
-#ifndef _STDLIB_H
-#define _STDLIB_H
 
 /*--------------------------------------------------------------------
                                INCLUDES
 --------------------------------------------------------------------*/
 
-#include <sys/cdefs.h>
+#include <stdint.h>
 
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
@@ -29,9 +26,7 @@
                            MEMORY CONSTANTS
 --------------------------------------------------------------------*/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+static const uint8_t alphabet[] = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz";
 
 /*--------------------------------------------------------------------
                               VARIABLES
@@ -45,27 +40,51 @@ extern "C" {
                               PROCEDURES
 --------------------------------------------------------------------*/
 
-__attribute__((__noreturn__))
-void abort
-    (
-    void
-    );
 
-char * itoa
-    (
-    int                 value, 
-    char *              result,
-    int                 base 
-    );
-
+/*********************************************************************
+*
+*   PROCEDURE NAME:
+*       utoa
+*
+*   DESCRIPTION:
+*       Convert signed int to string
+*
+*********************************************************************/
 char * utoa
     (
-    unsigned int        value, 
+    unsigned int        value,
     char *              result,
-    int                 base 
-    );
+    int                 base
+    )
+    {
+    // check that the base is valid
+    if( base < 2 || base > 36 )
+        {
+        *result = '\0'; 
+        return result;
+        }
 
-#ifdef __cplusplus
-}
-#endif
-#endif /* _STDLIB_H */
+    char * ptr = result;
+    char * ptr1 = result;
+    char tmp_char;
+    uint32_t tmp_value;
+
+    do
+        {
+        tmp_value = value;
+        value /= base;
+        *ptr++ = alphabet[ 35 + ( tmp_value - value * base ) ];
+        } 
+        while( value );
+    
+    *ptr-- = '\0';
+    while( ptr1 < ptr )
+        {
+        tmp_char = *ptr;
+        *ptr-- = *ptr1;
+        *ptr1++ = tmp_char;
+        }
+    
+    return result;
+    
+    } /* utoa() */
