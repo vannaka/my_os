@@ -24,7 +24,7 @@
                           LITERAL CONSTANTS
 --------------------------------------------------------------------*/
 
-#define MAX_IDT_ENTRIES 128
+#define MAX_IDT_ENTRIES 256
 
 /*----------------------------------------------------------
 Privilege level
@@ -143,12 +143,17 @@ void intrrupt_init
     )
     {
     /*------------------------------------------------------
-    Setup Default handler
+    Setup Default handlers
     ------------------------------------------------------*/
     for( int i = 0; i < MAX_IDT_ENTRIES; i++ )
         {
         install_interrupt( i, dflt_intr_hndlr, INTR_DFLT_FLAGS );
         }
+
+    /*------------------------------------------------------
+    Setup specific handlers
+    ------------------------------------------------------*/
+    install_interrupt( INT_NUM__GEN_PROT_FAULT, general_protection_hndlr, INTR_DFLT_FLAGS );
 
     /*------------------------------------------------------
     Install IDT
