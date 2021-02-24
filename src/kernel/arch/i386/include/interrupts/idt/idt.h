@@ -34,7 +34,7 @@ struct interrupt_frame
 
 typedef uint32_t exception_code_t;
 
-enum int_vector_num_t
+enum intr_vector_num_t
     {
     INT_NUM__FIRST = 0,
 
@@ -70,7 +70,24 @@ enum int_vector_num_t
     INT_NUM__RESERVED_29,
     INT_NUM__SECURITY_EXCEPTION,
     INT_NUM__RESSERVED_31,
-    INT_NUM__TRIPPLE_FAULT,
+    
+    IRQ_NUM__00,
+    IRQ_NUM__01,
+    IRQ_NUM__02,
+    IRQ_NUM__03,
+    IRQ_NUM__04,
+    IRQ_NUM__05,
+    IRQ_NUM__06,
+    IRQ_NUM__07,
+    IRQ_NUM__08,
+    IRQ_NUM__09,
+    IRQ_NUM__10,
+    IRQ_NUM__11,
+    IRQ_NUM__12,
+    IRQ_NUM__13,
+    IRQ_NUM__14,
+    IRQ_NUM__15,
+    IRQ_NUM__16,
 
     INT_NUM__CNT
     };

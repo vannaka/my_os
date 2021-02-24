@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <interrupts/idt.h>
+#include <interrupts/idt/idt.h>
 
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS

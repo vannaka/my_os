@@ -18,7 +18,7 @@
 
 #include <kernel/types.h>
 
-#include <interrupts/idt.h>
+#include <interrupts/idt/idt.h>
 
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
@@ -122,7 +122,8 @@ extern void do_install_idt
 
 void install_interrupt
     (
-    int                 idx,
+    enum intr_vector_num_t   
+                        idx,
     void *              hndlr,
     uint8_t             flags
     );
@@ -174,7 +175,8 @@ void intrrupt_init
 *********************************************************************/
 void install_interrupt
     (
-    int                 idx,
+    enum intr_vector_num_t   
+                        idx,
     void *              hndlr,
     uint8_t             flags
     )

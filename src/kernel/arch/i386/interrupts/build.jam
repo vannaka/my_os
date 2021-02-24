@@ -20,19 +20,26 @@
 
 lib IDT
     :
-    idt_asm.S
-    idt.c
+    idt/idt_asm.S
+    idt/idt.c
     :
     <link>static
     ;
 
 lib HNDLRS
     :
-    intr_handlers.c
+    handlers/intr_handlers.c
     :
     # Since GCC doesn’t preserve SSE, MMX nor x87 states, 
     #   the GCC option -mgeneral-regs-only should be used 
     #   to compile interrupt and exception handlers.
     <cflags>-mgeneral-regs-only
+    <link>static
+    ;
+
+lib CNTRLR
+    :
+    intr_cntrlr.c
+    :
     <link>static
     ;
