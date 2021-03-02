@@ -1,21 +1,21 @@
 /*********************************************************************
 *
 *   MODULE:
-*       intr_cntrlr.c
+*       intc.h
 *
 *   DESCRIPTION:
-*       Interupt controller driver
+*       Interrupt controller definitions
 *
 *********************************************************************/
+
+#ifndef _KERNEL_INTC_H
+#define _KERNEL_INTC_H
 
 /*--------------------------------------------------------------------
                                INCLUDES
 --------------------------------------------------------------------*/
 
 #include <stdint.h>
-
-#include <interrupts/controller/intr_cntrlr.h>
-#include <interrupts/controller/pic/pic.h>
 
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
@@ -25,59 +25,49 @@
                                 TYPES
 --------------------------------------------------------------------*/
 
-/*--------------------------------------------------------------------
-                                MACROS
---------------------------------------------------------------------*/
+struct intc_cnfg
+    {
+    void (*intc_init)( void );
+    void (*intc_ack)( uint32_t irq );
+    void (*intc_hndlr)( uint32_t irq );
+    };
 
 /*--------------------------------------------------------------------
                            MEMORY CONSTANTS
 --------------------------------------------------------------------*/
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*--------------------------------------------------------------------
                               VARIABLES
 --------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------
+                                MACROS
+--------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------
                               PROCEDURES
 --------------------------------------------------------------------*/
 
-/*********************************************************************
-*
-*   PROCEDURE NAME:
-*       intr_cntrl_init
-*
-*   DESCRIPTION:
-*       Init interrupt controller driver
-*
-*********************************************************************/
-void intr_cntrl_init
+void intc_init
     (
-    enum intr_cntrlr_type
-                        controller
-    )
-    {
-    
-    
+    struct intc_cnfg cnfg
+    );
 
-    };
-
-/*********************************************************************
-*
-*   PROCEDURE NAME:
-*       intr_cntrl_eoi
-*
-*   DESCRIPTION:
-*       Send EOI to interrupt controller
-*
-*********************************************************************/
-void intr_cntrl_eoi
+void intc_ack
     (
-    uint8_t             irq         /* The IRQ number to clear      */
+    uint32_t            irq         /* The IRQ number to clear      */
+    );
+
+void intc_hndlr
+    (
+    uint32_t            irq
     )
-    {
-    
-    // TODO: Call low level driver of PIC or APIC or etc.
-    pic_send_eoi( irq );
 
-
-    } /* intr_cntrl_eoi() */
+#ifdef __cplusplus
+}
+#endif
+#endif /* _KERNEL_INTC_H */

@@ -170,7 +170,7 @@ void intrrupt_init
 *       install_interrupt
 *
 *   DESCRIPTION:
-*       description
+*       Install handler into the IDT
 *
 *********************************************************************/
 void install_interrupt
