@@ -1,21 +1,24 @@
 /*********************************************************************
 *
 *   MODULE:
-*       intc.h
+*       intc_contract.h
 *
 *   DESCRIPTION:
-*       Interrupt controller definitions
+*       Architecture specific interrupt controller definitions
 *
 *********************************************************************/
 
-#ifndef _KERNEL_INTC_H
-#define _KERNEL_INTC_H
+#ifndef _KERNEL_INTC_CONTRACT_H
+#define _KERNEL_INTC_CONTRACT_H
 
 /*--------------------------------------------------------------------
                                INCLUDES
 --------------------------------------------------------------------*/
 
+#include <stdbool.h>
 #include <stdint.h>
+
+#include "intc.h"
 
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
@@ -25,13 +28,27 @@
                                 TYPES
 --------------------------------------------------------------------*/
 
-enum intc_trigger_type
+struct intc_cnfg
     {
-    INTC_TRIGGER__EDGE,
-    INTC_TRIGGER__RISING
+    void (*intc_init)( void );
+    void (*intc_ack)( uint32_t irq );
+    void (*intc_hndlr)( uint32_t irq );
+    void (*intc_reg_hndlr)
+        (
+        uint32_t            irq,
+        enum intc_trigger_type
+                            trigger_type,
+        bool                auto_ack
+        );
     };
 
-typedef void (irq_hndlr_type)(uint32_t irq, bool auto_ack);
+struct irq_type
+    {
+    irq_hndlr_type *    hndlr;
+    bool                auto_ack;
+    enum intc_trigger_type   
+                        trigger_type;
+    };
 
 /*--------------------------------------------------------------------
                            MEMORY CONSTANTS
@@ -53,31 +70,20 @@ extern "C" {
                               PROCEDURES
 --------------------------------------------------------------------*/
 
-void intc_init
+
+/*------------------------------------------------------
+Arch defines this to install its low level int controler 
+driver
+------------------------------------------------------*/
+void intc_install_low_level_driver
     (
-    void
+    struct intc_cnfg *  cnfg,
+    struct irq_type *   irq_info,
+    uint32_t *          irq_info_cnt
     );
 
-void intc_ack
-    (
-    uint32_t            irq         /* The IRQ number to clear      */
-    );
-
-void intc_hndlr
-    (
-    uint32_t            irq
-    );
-
-void intc_register_irq_hndlr
-    (
-    uint32_t            irq,
-    enum intc_trigger_type
-                        trigger_type,
-    bool                auto_ack,
-    irq_hndlr_type *    irq_hndlr
-    );
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* _KERNEL_INTC_H */
+#endif /* _KERNEL_INTC_CONTRACT_H */
