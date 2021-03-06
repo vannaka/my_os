@@ -17,6 +17,8 @@
 
 #include <stdint.h>
 
+#include "intc_types.h"
+
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
 --------------------------------------------------------------------*/
@@ -24,14 +26,6 @@
 /*--------------------------------------------------------------------
                                 TYPES
 --------------------------------------------------------------------*/
-
-enum intc_trigger_type
-    {
-    INTC_TRIGGER__EDGE,
-    INTC_TRIGGER__RISING
-    };
-
-typedef void (irq_hndlr_type)(uint32_t irq, bool auto_ack);
 
 /*--------------------------------------------------------------------
                            MEMORY CONSTANTS
@@ -63,6 +57,19 @@ void intc_ack
     uint32_t            irq         /* The IRQ number to clear      */
     );
 
+void intc_enable
+    (
+    uint32_t            irq,
+    bool                enable
+    );
+
+void intc_trigger_type
+    (
+    uint32_t            irq,
+    enum intc_trigger_type
+                        trigger_type
+    );
+
 void intc_hndlr
     (
     uint32_t            irq
@@ -74,7 +81,8 @@ void intc_register_irq_hndlr
     enum intc_trigger_type
                         trigger_type,
     bool                auto_ack,
-    irq_hndlr_type *    irq_hndlr
+    bool                enable,
+    irq_hndlr_func *    irq_hndlr
     );
 
 #ifdef __cplusplus

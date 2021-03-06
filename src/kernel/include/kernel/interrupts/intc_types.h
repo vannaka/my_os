@@ -1,33 +1,53 @@
 /*********************************************************************
 *
 *   MODULE:
-*       pic.h
+*       intc_contract.h
 *
 *   DESCRIPTION:
-*       Programmable Interrupt Controller definitions
+*       Architecture specific interrupt controller definitions
 *
 *********************************************************************/
 
-#ifndef _KERNEL_PIC_H
-#define _KERNEL_PIC_H
+#ifndef _KERNEL_INTC_TYPES_H
+#define _KERNEL_INTC_TYPES_H
 
 /*--------------------------------------------------------------------
                                INCLUDES
 --------------------------------------------------------------------*/
 
+#include <stdbool.h>
 #include <stdint.h>
-
-#include <kernel/interrupts/intc_types.h>
 
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
 --------------------------------------------------------------------*/
 
-#define INTC_PIC_IRQ_CNT 16
-
 /*--------------------------------------------------------------------
                                 TYPES
 --------------------------------------------------------------------*/
+
+enum intc_trigger_type
+    {
+    INTC_TRIGGER__EDGE,
+    INTC_TRIGGER__RISING
+    };
+
+typedef void (irq_hndlr_func)(uint32_t irq );
+
+struct intc_cnfg
+    {
+    void (*init)( void );
+    void (*ack)( uint32_t irq );
+    void (*hndlr)( uint32_t irq );
+    void (*trigger_type)( uint32_t irq, enum intc_trigger_type trigger_type );
+    void (*enable)( uint32_t irq, bool enable );
+    };
+
+struct irq_hndlr_type
+    {
+    irq_hndlr_func *    hndlr;
+    bool                auto_ack;
+    };
 
 /*--------------------------------------------------------------------
                            MEMORY CONSTANTS
@@ -37,16 +57,9 @@
 extern "C" {
 #endif
 
-extern const uint32_t   pic_irq_hndlr_cnt;
-                                    /* The count of hndlers array   */
-
 /*--------------------------------------------------------------------
                               VARIABLES
 --------------------------------------------------------------------*/
-
-extern struct irq_hndlr_type
-                        pic_irq_hndlrs[ INTC_PIC_IRQ_CNT ]; 
-                                    /* Registered irq handlers      */
 
 /*--------------------------------------------------------------------
                                 MACROS
@@ -56,42 +69,8 @@ extern struct irq_hndlr_type
                               PROCEDURES
 --------------------------------------------------------------------*/
 
-void pic_init
-    (
-    void
-    );
-
-void pic_send_eoi
-    (
-    uint32_t             irq     /* The irq to send eoi for          */     
-    );
-
-void pic_irq_enable
-    (
-    uint32_t            irq,
-    bool                enable
-    );
-
-void pic_irq_trigger_type
-    (
-    uint32_t            irq,
-    enum intc_trigger_type
-                        trigger_type
-    );
-
-uint16_t pic_get_irr
-    (
-    void
-    );
-
-uint16_t pic_get_isr
-    (
-    void
-    );
-
-
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* _KERNEL_PIC_H */
+#endif /* _KERNEL_INTC_TYPES_H */

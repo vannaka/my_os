@@ -71,7 +71,8 @@ enum intr_vector_num_t
     INT_NUM__SECURITY_EXCEPTION,
     INT_NUM__RESSERVED_31,
     
-    IRQ_NUM__00,
+    IRQ_NUM__FIRST,
+    IRQ_NUM__00 = IRQ_NUM__FIRST,
     IRQ_NUM__01,
     IRQ_NUM__02,
     IRQ_NUM__03,
@@ -88,6 +89,7 @@ enum intr_vector_num_t
     IRQ_NUM__14,
     IRQ_NUM__15,
     IRQ_NUM__16,
+    IRQ_NUM__LAST = IRQ_NUM__16,
 
     INT_NUM__CNT
     };
@@ -132,6 +134,13 @@ void general_protection_hndlr
                         frame,
     exception_code_t    e_code
     );
+
+void intc_intr_hndlr
+    (
+    struct interrupt_frame * 
+                        frame
+    );
+    
 
 #ifdef __cplusplus
 }

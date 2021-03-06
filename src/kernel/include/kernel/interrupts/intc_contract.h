@@ -18,7 +18,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "intc.h"
+#include "intc_types.h"
 
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
@@ -27,28 +27,6 @@
 /*--------------------------------------------------------------------
                                 TYPES
 --------------------------------------------------------------------*/
-
-struct intc_cnfg
-    {
-    void (*intc_init)( void );
-    void (*intc_ack)( uint32_t irq );
-    void (*intc_hndlr)( uint32_t irq );
-    void (*intc_reg_hndlr)
-        (
-        uint32_t            irq,
-        enum intc_trigger_type
-                            trigger_type,
-        bool                auto_ack
-        );
-    };
-
-struct irq_type
-    {
-    irq_hndlr_type *    hndlr;
-    bool                auto_ack;
-    enum intc_trigger_type   
-                        trigger_type;
-    };
 
 /*--------------------------------------------------------------------
                            MEMORY CONSTANTS
@@ -78,8 +56,9 @@ driver
 void intc_install_low_level_driver
     (
     struct intc_cnfg *  cnfg,
-    struct irq_type *   irq_info,
-    uint32_t *          irq_info_cnt
+    struct irq_hndlr_type **
+                        irq_hndlrs,
+    uint32_t *          irq_hndlrs_cnt
     );
 
 

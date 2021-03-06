@@ -1,97 +1,74 @@
 /*********************************************************************
 *
 *   MODULE:
-*       pic.h
+*       intc_arch.c
 *
 *   DESCRIPTION:
-*       Programmable Interrupt Controller definitions
+*       Arch interrupt controller definitions
 *
 *********************************************************************/
-
-#ifndef _KERNEL_PIC_H
-#define _KERNEL_PIC_H
 
 /*--------------------------------------------------------------------
                                INCLUDES
 --------------------------------------------------------------------*/
 
+#include <stddef.h>
 #include <stdint.h>
 
-#include <kernel/interrupts/intc_types.h>
+#include <kernel/interrupts/intc_contract.h>
+
+#include <interrupts/controller/pic/pic.h>
 
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
 --------------------------------------------------------------------*/
-
-#define INTC_PIC_IRQ_CNT 16
 
 /*--------------------------------------------------------------------
                                 TYPES
 --------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------
+                                MACROS
+--------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------
                            MEMORY CONSTANTS
 --------------------------------------------------------------------*/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-extern const uint32_t   pic_irq_hndlr_cnt;
-                                    /* The count of hndlers array   */
-
 /*--------------------------------------------------------------------
                               VARIABLES
---------------------------------------------------------------------*/
-
-extern struct irq_hndlr_type
-                        pic_irq_hndlrs[ INTC_PIC_IRQ_CNT ]; 
-                                    /* Registered irq handlers      */
-
-/*--------------------------------------------------------------------
-                                MACROS
 --------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------
                               PROCEDURES
 --------------------------------------------------------------------*/
 
-void pic_init
+/*********************************************************************
+*
+*   PROCEDURE NAME:
+*       intc_install_low_level_driver
+*
+*   DESCRIPTION:
+*       Install the low level interrupt controller driver
+*
+*********************************************************************/
+void intc_install_low_level_driver
     (
-    void
-    );
+    struct intc_cnfg *  cnfg,
+    struct irq_hndlr_type **   
+                        irq_hndlrs,
+    uint32_t *          irq_hndlrs_cnt
+    )
+    {
+    /*------------------------------------------------------
+    Install low level driver
+    ------------------------------------------------------*/
+    cnfg->ack = pic_send_eoi;
+    cnfg->enable = pic_irq_enable;
+    cnfg->init = pic_init;
+    cnfg->trigger_type = pic_irq_trigger_type;
 
-void pic_send_eoi
-    (
-    uint32_t             irq     /* The irq to send eoi for          */     
-    );
+    *irq_hndlrs = pic_irq_hndlrs;
+    *irq_hndlrs_cnt = pic_irq_hndlr_cnt;
 
-void pic_irq_enable
-    (
-    uint32_t            irq,
-    bool                enable
-    );
-
-void pic_irq_trigger_type
-    (
-    uint32_t            irq,
-    enum intc_trigger_type
-                        trigger_type
-    );
-
-uint16_t pic_get_irr
-    (
-    void
-    );
-
-uint16_t pic_get_isr
-    (
-    void
-    );
-
-
-
-#ifdef __cplusplus
-}
-#endif
-#endif /* _KERNEL_PIC_H */
+    } /* intc_install_low_level_driver() */

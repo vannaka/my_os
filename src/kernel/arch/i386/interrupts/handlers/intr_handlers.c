@@ -17,7 +17,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <kernel/interrupts/intc.h>
+
 #include <interrupts/idt/idt.h>
+#include <interrupts/controller/pic/pic.h>
 
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
@@ -136,3 +139,57 @@ void general_protection_hndlr
         }
 
     } /* general_protection_hndlr() */
+
+
+/*********************************************************************
+*
+*   PROCEDURE NAME:
+*       intc_intr_hndlr
+*
+*   DESCRIPTION:
+*       The default interrupt handler
+*
+*********************************************************************/
+__attribute__((interrupt))
+void intc_intr_hndlr
+    (
+    struct interrupt_frame * 
+                        frame
+    )
+    {
+    /*------------------------------------------------------
+    Local Variables
+    ------------------------------------------------------*/
+    uint16_t            isr;
+    uint32_t            irq;
+
+    /*------------------------------------------------------
+    Read in service register
+    ------------------------------------------------------*/
+    isr = pic_get_isr();
+
+    /*------------------------------------------------------
+    Find set bit
+    ------------------------------------------------------*/
+    for( irq = 0; irq < 16; irq++ )
+        {
+        if( ( isr >> irq ) & 0x1 )
+            {
+            break;
+            }
+        }
+
+    /*------------------------------------------------------
+    Missfire?
+    ------------------------------------------------------*/
+    if( irq == 16 )
+        {
+        return;
+        }
+
+    /*------------------------------------------------------
+    Call high level handler
+    ------------------------------------------------------*/
+    intc_hndlr( irq );
+
+    } /* intc_intr_hndlr() */

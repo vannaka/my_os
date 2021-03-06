@@ -152,9 +152,17 @@ void intrrupt_init
         }
 
     /*------------------------------------------------------
-    Setup specific handlers
+    Setup exception handlers
     ------------------------------------------------------*/
     install_interrupt( INT_NUM__GEN_PROT_FAULT, general_protection_hndlr, INTR_DFLT_FLAGS );
+
+    /*------------------------------------------------------
+    Setup irq handler
+    ------------------------------------------------------*/
+    for( int i = IRQ_NUM__FIRST; i < IRQ_NUM__LAST; i++ )
+        {
+        install_interrupt( i, intc_intr_hndlr, INTR_DFLT_FLAGS );
+        }
 
     /*------------------------------------------------------
     Install IDT

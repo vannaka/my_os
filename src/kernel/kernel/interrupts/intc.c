@@ -44,10 +44,10 @@
 --------------------------------------------------------------------*/
 
 static struct intc_cnfg intc_cnfg;  /* low level driver callbacks   */
-static struct irq_type * 
-                        irq_info;   /* Registered irq info          */
-static uint32_t         irq_info_cnt;
-                                    /* The count of info array      */
+static struct irq_hndlr_type * 
+                        irq_hndlrs; /* Registered irq handlers      */
+static uint32_t         irq_hndlr_cnt;
+                                    /* The count of hndlers array   */
 
 /*--------------------------------------------------------------------
                               PROCEDURES
@@ -70,26 +70,70 @@ void intc_init
     /*------------------------------------------------------
     Init variables
     ------------------------------------------------------*/
-    memset( irq_info, 0, sizeof( irq_info ) );
     memset( &intc_cnfg, 0, sizeof( intc_cnfg ) );
+    irq_hndlrs = NULL;
+    irq_hndlr_cnt = 0;
 
     /*------------------------------------------------------
     Let arch install low level driver
     ------------------------------------------------------*/
-    intc_install_low_level_driver( &intc_cnfg, irq_info, &irq_info_cnt );
+    intc_install_low_level_driver( &intc_cnfg, &irq_hndlrs, &irq_hndlrs );
 
     /*------------------------------------------------------
     Validate inputs
     ------------------------------------------------------*/
-    assert( intc_cnfg.intc_init != NULL );
-    assert( intc_cnfg.intc_ack != NULL );
+    assert( intc_cnfg.init != NULL );
+    assert( intc_cnfg.ack != NULL );
+    assert( intc_cnfg.trigger_type != NULL );
+    assert( intc_cnfg.enable != NULL );
 
     /*------------------------------------------------------
     Call low level driver init
     ------------------------------------------------------*/
-    intc_cnfg.intc_init();
+    intc_cnfg.init();
 
     }; /* intc_init() */
+
+
+/*********************************************************************
+*
+*   PROCEDURE NAME:
+*       intc_trigger_type
+*
+*   DESCRIPTION:
+*       Set trigger type
+*
+*********************************************************************/
+void intc_trigger_type
+    (
+    uint32_t            irq,
+    enum intc_trigger_type
+                        trigger_type
+    )
+    {
+    intc_cnfg.trigger_type( irq, trigger_type );
+
+    } /* intc_trigger_type() */
+
+
+/*********************************************************************
+*
+*   PROCEDURE NAME:
+*       intc_enable
+*
+*   DESCRIPTION:
+*       Enable/Disable irq
+*
+*********************************************************************/
+void intc_enable
+    (
+    uint32_t            irq,
+    bool                enable
+    )
+    {
+    intc_cnfg.enable( irq, enable );
+
+    } /* intc_enable() */
 
 
 /*********************************************************************
@@ -109,7 +153,7 @@ void intc_ack
     /*------------------------------------------------------
     Call low level driver ack
     ------------------------------------------------------*/
-    intc_cnfg.intc_ack( irq );
+    intc_cnfg.ack( irq );
 
     } /* intc_ack() */
 
@@ -129,26 +173,27 @@ void intc_register_irq_hndlr
     enum intc_trigger_type
                         trigger_type,
     bool                auto_ack,
-    irq_hndlr_type *    irq_hndlr
+    bool                enable,
+    irq_hndlr_func *    irq_hndlr
     )
     {
     /*------------------------------------------------------
     Validate inputs
     ------------------------------------------------------*/
-    assert( irq < irq_info_cnt );
+    assert( irq < irq_hndlr_cnt );
     assert( irq_hndlr != NULL );
 
     /*------------------------------------------------------
     Register handler w/ high level driver
     ------------------------------------------------------*/
-    irq_info[ irq ].trigger_type = trigger_type;
-    irq_info[ irq ].auto_ack = auto_ack;
-    irq_info[ irq ].hndlr = irq_hndlr;
+    irq_hndlrs[ irq ].auto_ack = auto_ack;
+    irq_hndlrs[ irq ].hndlr = irq_hndlr;
 
     /*------------------------------------------------------
-    Register handler w/ low level driver
+    Configure low level driver
     ------------------------------------------------------*/
-    intc_cnfg.intc_reg_hndlr( irq, trigger_type, auto_ack );
+    intc_trigger_type( irq, trigger_type );
+    intc_enable( irq, enable );
 
     } /* intc_register_irq_hndlr() */
 
@@ -171,18 +216,28 @@ void intc_hndlr
     /*------------------------------------------------------
     irq should never excede cnt set by low level driver
     ------------------------------------------------------*/
-    assert( irq < irq_info_cnt );
+    assert( irq < irq_hndlr_cnt );
 
     /*------------------------------------------------------
     Call registered irq handler
     ------------------------------------------------------*/
-    irq_info[ irq ].hndlr( irq, irq_info[ irq ].auto_ack );
-
-    /*------------------------------------------------------
-    Call low level driver ack
-    ------------------------------------------------------*/
-    if( irq_info[ irq ].auto_ack )
+    if( irq_hndlrs[ irq ].hndlr != NULL )
         {
+        irq_hndlrs[ irq ].hndlr( irq );
+
+        /*--------------------------------------------------
+        Call low level driver ack
+        --------------------------------------------------*/
+        if( irq_hndlrs[ irq ].auto_ack )
+            {
+            intc_ack( irq );
+            }
+        }
+    else
+        {
+        /*--------------------------------------------------
+        Allways ack irq without a handler
+        --------------------------------------------------*/
         intc_ack( irq );
         }
     

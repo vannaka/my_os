@@ -12,8 +12,13 @@
                                INCLUDES
 --------------------------------------------------------------------*/
 
+#include <stdbool.h>
 #include <stdint.h>
 
+#include <kernel/types.h>
+#include <kernel/interrupts/intc_types.h>
+
+#include <interrupts/controller/pic/pic.h>
 #include <interrupts/idt/idt.h>
 #include <memory/mem_utils.h>
 
@@ -65,11 +70,16 @@ Initialization Command Words
 /*--------------------------------------------------------------------
                            MEMORY CONSTANTS
 --------------------------------------------------------------------*/
+const uint32_t   pic_irq_hndlr_cnt = CNT_OF_ARRAY( pic_irq_hndlrs );
+                                    /* The count of hndlers array   */
 
 /*--------------------------------------------------------------------
                               VARIABLES
 --------------------------------------------------------------------*/
 
+struct irq_hndlr_type
+                        pic_irq_hndlrs[ INTC_PIC_IRQ_CNT ]; 
+                                    /* Registered irq handlers      */
 /*--------------------------------------------------------------------
                               PROCEDURES
 --------------------------------------------------------------------*/
@@ -78,6 +88,7 @@ static void pic_remap
     (
     uint8_t             offset1
     );
+
 
 /*********************************************************************
 *
@@ -94,8 +105,128 @@ void pic_init
     )
     {
     pic_remap( IRQ_NUM__00 );
-    }
+
+    } /* pic_init() */
  
+
+/*********************************************************************
+*
+*   PROCEDURE NAME:
+*       pic_enable
+*
+*   DESCRIPTION:
+*       En/disable the given irq in the PIC
+*
+*********************************************************************/
+void pic_enable
+    (
+    uint32_t            irq,
+    bool                enable
+    )
+    {
+    // TODO: un/mask irq in PIC
+
+    } /* pic_enable() */
+
+
+/*********************************************************************
+*
+*   PROCEDURE NAME:
+*       pic_send_eoi
+*
+*   DESCRIPTION:
+*       Send EOI to programmable interrupt controller
+*
+*********************************************************************/
+void pic_send_eoi
+    (
+    uint32_t             irq     /* The irq to send eoi for          */     
+    )
+    {
+	if( irq >= 8 )
+        {
+		port_out_byte( PIC2_COMMAND, PIC_EOI );
+        }
+    
+	port_out_byte( PIC1_COMMAND, PIC_EOI );
+
+    } /* pic_send_eoi() */
+
+
+/*********************************************************************
+*
+*   PROCEDURE NAME:
+*       pic_irq_enable
+*
+*   DESCRIPTION:
+*       Set/clear irq bit in irq mask
+*
+*********************************************************************/
+void pic_irq_enable
+    (
+    uint32_t            irq,
+    bool                enable
+    )
+    {
+    /*------------------------------------------------------
+    Local Variables
+    ------------------------------------------------------*/
+    uint16_t port;
+    uint8_t value;
+ 
+    /*------------------------------------------------------
+    Get correct port for irq
+    ------------------------------------------------------*/
+    if( irq < 8 ) 
+        {
+        port = PIC1_DATA;
+        } 
+    else 
+        {
+        port = PIC2_DATA;
+        irq -= 8;
+        }
+
+    /*------------------------------------------------------
+    Get cur mask and un/set bit for irq
+    ------------------------------------------------------*/
+    value = port_in_byte( port ) & ~( 1 << irq );
+
+    if( enable )
+        {
+        value &= ~( 1 << irq );
+        }
+    else
+        {
+        value |= ( 1 << irq );
+        }
+
+    port_out_byte( port, value );
+
+    } /* pic_irq_enable() */
+
+
+/*********************************************************************
+*
+*   PROCEDURE NAME:
+*       pic_irq_trigger_type
+*
+*   DESCRIPTION:
+*       Set trigger type for given irq
+*
+*********************************************************************/
+void pic_irq_trigger_type
+    (
+    uint32_t            irq,
+    enum intc_trigger_type
+                        trigger_type
+    )
+    {
+    // TODO: Can we set this on a per irq basis?
+
+    } /* pic_irq_trigger_type() */
+
+
 /*********************************************************************
 *
 *   PROCEDURE NAME:
@@ -167,28 +298,12 @@ void pic_remap
 /*********************************************************************
 *
 *   PROCEDURE NAME:
-*       pic_send_eoi
+*       __pic_get_irq_reg
 *
 *   DESCRIPTION:
-*       Send EOI to programmable interrupt controller
+*       Get data from given pic data reg
 *
 *********************************************************************/
-void pic_send_eoi
-    (
-    uint8_t             irq     /* The irq to send eoi for          */     
-    )
-    {
-	if( irq >= 8 )
-        {
-		port_out_byte( PIC2_COMMAND, PIC_EOI );
-        }
-    
-	port_out_byte( PIC1_COMMAND, PIC_EOI );
-
-    } /* pic_send_eoi() */
-
-
-
 static uint16_t __pic_get_irq_reg( int ocw3 )
     {
     /* OCW3 to PIC CMD to get the register values.  PIC2 is chained, and
@@ -196,8 +311,9 @@ static uint16_t __pic_get_irq_reg( int ocw3 )
     port_out_byte( PIC1_COMMAND, ocw3 );
     port_out_byte( PIC2_COMMAND, ocw3 );
 
-    return (port_in_byte( PIC2_COMMAND ) << 8) | port_in_byte( PIC1_COMMAND );
-    }
+    return( port_in_byte( PIC2_COMMAND ) << 8) | port_in_byte( PIC1_COMMAND );
+    
+    } /* __pic_get_irq_reg() */
 
 
 /*********************************************************************
@@ -219,6 +335,7 @@ uint16_t pic_get_irr
     return __pic_get_irq_reg( PIC_READ_IRR );
 
     } /* pic_get_irr() */
+
 
 /*********************************************************************
 *
