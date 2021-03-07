@@ -80,18 +80,6 @@ struct desc_ptr
                                 MACROS
 --------------------------------------------------------------------*/
 
-/* #define IDT_ENTRY_INIT(flags, selec_num, offset) \
-//     {                                           \
-//     .offset0  = (uint16_t) (offset),            \
-//     .offset1  = ((offset) >> 16) & 0xFFFF,      \
-//     .selector = (uint16_t) (selec_num),          \
-//     .pad0     = 0x0,                            \
-//     .type     = ((flags) & 0x0F),               \
-//     .s        = ((flags) >> 4) & 0x01,          \
-//     .dpl      = ((flags) >> 5) & 0x03,          \
-//     .p        = ((flags) >> 7) & 0x01,          \
-//     } */
-
 /*--------------------------------------------------------------------
                            MEMORY CONSTANTS
 --------------------------------------------------------------------*/
@@ -132,13 +120,13 @@ void install_interrupt
 /*********************************************************************
 *
 *   PROCEDURE NAME:
-*       intrrupt_init
+*       interrupt_init
 *
 *   DESCRIPTION:
 *       Initialize interrupts
 *
 *********************************************************************/
-void intrrupt_init
+void interrupt_init
     (
     void
     )
@@ -169,7 +157,7 @@ void intrrupt_init
     ------------------------------------------------------*/
     do_install_idt( &idt_ptr );
 
-    } /* intrrupt_init() */
+    } /* interrupt_init() */
 
 
 /*********************************************************************

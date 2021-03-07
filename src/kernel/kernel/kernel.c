@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 #include <kernel/interrupts/interrupts.h>
+#include <kernel/interrupts/intc.h>
 #include <kernel/tty/tty.h>
 #include <kernel/memory/memory.h>
 
@@ -58,7 +59,7 @@ void kernel_main
 	void
 	)
 	{
-	int x = 2;
+	// int x = 2;
 
 	/*------------------------------------------------------
 	Init memory subsystem
@@ -68,7 +69,8 @@ void kernel_main
 	/*------------------------------------------------------
 	Init Interrupts
 	------------------------------------------------------*/
-	intrrupt_init();
+	interrupt_init();
+	intc_init();
 
 	/*------------------------------------------------------
 	Init screen hw
@@ -83,8 +85,11 @@ void kernel_main
 	printf( "Num: %d\n", 25 );
 	printf( "addr== 0x%X\n", &kernel_main );
 	
-	__asm__ ("int $0x0E");
-	
-	assert( x == 0 );
+	/*------------------------------------------------------
+	Enable interrupts
+	------------------------------------------------------*/
+	interrupts_enable();
+
+	while( true );
 
 	} /* kernel_main() */

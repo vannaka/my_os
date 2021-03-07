@@ -10,30 +10,17 @@
 #   LOCAL CONSTANTS
 #*********************************************************************
 
-local INC_DIR = ./include ;
-
 #*********************************************************************
 #   PROJECT
 #*********************************************************************
-
-project ARCH_X86 : requirements <include>$(INC_DIR) ;
 
 #*********************************************************************
 #   TARGETS
 #*********************************************************************
 
-alias ARCH
+lib INTC
     :
-    boot//BOOT
-    tty//TTY
-    memory//MEMORY
-    interrupts//IDT
-    interrupts//HNDLRS
-    interrupts//CNTRLR
+    intc.c
     :
-    :
-    :
-    # Usage Requirements
-    <linkscript>linker.ld
-    <include>./include/interrupts/ # TODO: I need to think about include path more
+    <link>static
     ;

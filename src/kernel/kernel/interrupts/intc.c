@@ -16,6 +16,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <kernel/interrupts/intc.h>
@@ -77,7 +78,7 @@ void intc_init
     /*------------------------------------------------------
     Let arch install low level driver
     ------------------------------------------------------*/
-    intc_install_low_level_driver( &intc_cnfg, &irq_hndlrs, &irq_hndlrs );
+    intc_install_low_level_driver( &intc_cnfg, &irq_hndlrs, &irq_hndlr_cnt );
 
     /*------------------------------------------------------
     Validate inputs

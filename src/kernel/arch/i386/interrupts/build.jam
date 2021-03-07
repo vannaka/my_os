@@ -39,7 +39,8 @@ lib HNDLRS
 
 lib CNTRLR
     :
-    intr_cntrlr.c
+    controller/intc_arch.c
+    controller/pic/pic.c
     :
     <link>static
     ;

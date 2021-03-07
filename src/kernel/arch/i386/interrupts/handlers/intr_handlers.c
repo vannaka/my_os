@@ -147,7 +147,7 @@ void general_protection_hndlr
 *       intc_intr_hndlr
 *
 *   DESCRIPTION:
-*       The default interrupt handler
+*       Interrupt controller interrupt handler
 *
 *********************************************************************/
 __attribute__((interrupt))

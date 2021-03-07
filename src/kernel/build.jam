@@ -55,6 +55,7 @@ exe kernel_bin
     ARCH_CRT_BEGIN
 
     ARCH
+    kernel/interrupts//INTC
     kernel/kernel.c
     
     [ lib k ]

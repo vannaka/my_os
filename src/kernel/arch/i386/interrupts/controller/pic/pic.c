@@ -106,6 +106,8 @@ void pic_init
     {
     pic_remap( IRQ_NUM__00 );
 
+    // TODO: Mask all irq's
+
     } /* pic_init() */
  
 
@@ -190,7 +192,7 @@ void pic_irq_enable
     /*------------------------------------------------------
     Get cur mask and un/set bit for irq
     ------------------------------------------------------*/
-    value = port_in_byte( port ) & ~( 1 << irq );
+    value = port_in_byte( port );
 
     if( enable )
         {
@@ -258,7 +260,7 @@ void pic_remap
     Start the init sequence in cascade mode w/ ICW4 needed
     ------------------------------------------------------*/
 	port_out_byte( PIC1_COMMAND, ICW1_INIT | ICW1_ICW4 );
-	port_port_io_wait();
+	port_io_wait();
 	port_out_byte( PIC2_COMMAND, ICW1_INIT | ICW1_ICW4 );
 	port_io_wait();
 
