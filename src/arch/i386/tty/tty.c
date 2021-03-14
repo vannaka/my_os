@@ -27,8 +27,7 @@
 
 #define VGA_WIDTH   80
 #define VGA_HEIGHT  25
-// #define VGA_MEMORY  0xB8000
-#define VGA_MEMORY  0xC03FF000 // Addr in higher half kernel mappings.
+#define VGA_MEMORY  ( 0xC0000000 + 0x000B8000 ) // Addr in higher half kernel mappings.
 
 /*--------------------------------------------------------------------
                                 TYPES

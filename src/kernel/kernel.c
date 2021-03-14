@@ -16,6 +16,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include <kernel/boot/multiboot.h>
 #include <kernel/interrupts/interrupts.h>
 #include <kernel/interrupts/intc.h>
 #include <kernel/tty/tty.h>
@@ -56,10 +57,30 @@
 *********************************************************************/
 void kernel_main
 	(
-	void
+	multiboot_info_t * 	mbd,
+	unsigned int 		magic
 	)
 	{
-	// int x = 2;
+	/*------------------------------------------------------
+	Local Variables
+	------------------------------------------------------*/
+	// struct multiboot_mmap_entry *
+	// 					mmap_entry;
+	uint32_t 			ram_sz;
+
+	if( mbd->flags & MULTIBOOT_INFO_MEMORY )
+		{
+		ram_sz = mbd->mem_lower + mbd->mem_upper;
+		ram_sz *= 1024;
+		}
+
+	(void)ram_sz;
+
+	// for( int i = 0; i < mbd->mmap_length; i++ )
+	// 	{
+		
+	// 	}
+	// mmap_entry = mbd->mmap_addr;
 
 	/*------------------------------------------------------
 	Init memory subsystem

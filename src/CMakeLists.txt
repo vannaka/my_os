@@ -27,6 +27,7 @@ target_sources(kernel.elf
     PRIVATE
         kernel/kernel.c
         kernel/interrupts/intc.c
+        kernel/memory/page_frame.c
     )
 
 #-----------------------------------------------------------

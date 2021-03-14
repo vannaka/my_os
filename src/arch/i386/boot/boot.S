@@ -12,16 +12,19 @@
 							   INCLUDES
 --------------------------------------------------------------------*/
 
+#include <kernel/boot/multiboot.h>
+
 /*--------------------------------------------------------------------
 						  LITERAL CONSTANTS
 --------------------------------------------------------------------*/
 
-# Declare constants for the multiboot header.
-.set ALIGN,    1<<0             # align loaded modules on page boundaries
-.set MEMINFO,  1<<1             # provide memory map
-.set FLAGS,    ALIGN | MEMINFO  # this is the Multiboot 'flag' field
-.set MAGIC,    0x1BADB002       # 'magic number' lets bootloader find the header
-.set CHECKSUM, -(MAGIC + FLAGS) # checksum of above, to prove we are multiboot
+#define STACK_SIZE                  0x4000
+#define START_MAP_PA				0x0
+#define END_MAP_PA					pa(_kernel_end)
+#define PAGE_FRAME_SZ				0x1000
+#define PG_TBL_ENTRY_SZ				0x4
+
+#define MULTIBOOT_HEADER_FLAGS 		MULTIBOOT_PAGE_ALIGN | MULTIBOOT_MEMORY_INFO 
 
 /*--------------------------------------------------------------------
 								TYPES
@@ -40,9 +43,9 @@ Declare a header as in the Multiboot Standard.
 ----------------------------------------------------------*/
 .section .multiboot.data, "aw"
 .align 4
-.long MAGIC
-.long FLAGS
-.long CHECKSUM
+.long MULTIBOOT_HEADER_MAGIC
+.long MULTIBOOT_HEADER_FLAGS
+.long -( MULTIBOOT_HEADER_MAGIC + MULTIBOOT_HEADER_FLAGS )
 
 /*----------------------------------------------------------
 Reserve a stack for the initial thread.
@@ -50,7 +53,7 @@ Reserve a stack for the initial thread.
 .section .bootstrap_stack, "aw", @nobits
 .align 16
 stack_bottom:
-.skip 16384 # 16 KiB
+.skip STACK_SIZE
 stack_top:
 
 /*----------------------------------------------------------
@@ -71,9 +74,15 @@ boot_page_table1:
 								MACROS
 --------------------------------------------------------------------*/
 
-# TODO: Define page offset in a header
+// TODO: Define page offset in a header
 #define __PAGE_OFFSET 0xC0000000
 #define pa(X) ((X) - __PAGE_OFFSET)
+
+// TODO: Move these to a header
+#define pg_tbl_idx( x ) ( ( (x) >> 12 ) & 0x3FF )
+#define pg_dir_idx( x ) ( ( (x) >> 22 ) & 0x3FF )
+
+#define pg_dir_entry( x ) ( pa( boot_page_directory ) + ( pg_dir_idx( x ) * 4 ) )
 
 /*--------------------------------------------------------------------
 							  PROCEDURES
@@ -97,79 +106,102 @@ _start:
 	Map page frames 0 to _kernel_end at __PAGE_OFFSET
 	------------------------------------------------------*/
 	movl $pa(boot_page_table1), %edi
-	# First address to map is address 0.
-	movl $0, %esi
-	# Map 1023 pages. The 1024th will be the VGA text buffer.
+	movl $START_MAP_PA, %esi
 	movl $1023, %ecx
 
+	/*------------------------------------------------------
+	If esi is less than start addr go to next page. If
+	esi is greater than end addr, we're done mapping.
+	------------------------------------------------------*/
 1:
-	# Only map the kernel.
-	cmpl $0x00100000, %esi
+	cmpl $START_MAP_PA, %esi
 	jl 2f
-	cmpl $pa(_kernel_end), %esi
+	cmpl $END_MAP_PA, %esi
 	jge 3f
 
-	# Map physical address as "present, writable". Note that this maps
-	# .text and .rodata as writable. Mind security and map them as non-writable.
+	/*------------------------------------------------------
+	Map page frame as "present, writable".
+
+	TODO: Use linker variables to map pages for .text and 
+		.rodata as read only.
+	------------------------------------------------------*/
 	movl %esi, %edx
 	orl $0x003, %edx
 	movl %edx, (%edi)
 
+	/*------------------------------------------------------
+	Go to next page frame
+	------------------------------------------------------*/
 2:
-	# Size of page is 4096 bytes.
-	addl $4096, %esi
-	# Size of entries in boot_page_table1 is 4 bytes.
-	addl $4, %edi
-	# Loop to the next entry if we haven't finished.
+	addl $PAGE_FRAME_SZ, %esi
+	addl $PG_TBL_ENTRY_SZ, %edi
+	
+	/*------------------------------------------------------
+	Loop if there is still room in boot_page_table1[], i.e.
+		ecx is not 0.
+	------------------------------------------------------*/
 	loop 1b
 
+	// TODO: Check that esi >= END_MAP_PA
+
+	/*------------------------------------------------------
+	Install page table at both 0x0 and __PAGE_OFFSET
+	------------------------------------------------------*/
 3:
-	# Map VGA video memory to 0xC03FF000 as "present, writable".
-	movl $(0x000B8000 | 0x003), pa(boot_page_table1) + 1023 * 4
+	movl $(pa(boot_page_table1) + 0x003), pg_dir_entry( 0 )
+	movl $(pa(boot_page_table1) + 0x003), pg_dir_entry( __PAGE_OFFSET )
 
-	# The page table is used at both page directory entry 0 (virtually from 0x0
-	# to 0x3FFFFF) (thus identity mapping the kernel) and page directory entry
-	# 768 (virtually from 0xC0000000 to 0xC03FFFFF) (thus mapping it in the
-	# higher half). The kernel is identity mapped because enabling paging does
-	# not change the next instruction, which continues to be physical. The CPU
-	# would instead page fault if there was no identity mapping.
-
-	# Map the page table to both virtual addresses 0x00000000 and 0xC0000000.
-	movl $(pa(boot_page_table1) + 0x003), pa(boot_page_directory) + 0
-	movl $(pa(boot_page_table1) + 0x003), pa(boot_page_directory) + 768 * 4
-
-	# Set cr3 to the address of the boot_page_directory.
+	/*------------------------------------------------------
+	Set cr3 to the address of the boot_page_directory.
+	------------------------------------------------------*/
 	movl $pa(boot_page_directory), %ecx
 	movl %ecx, %cr3
 
-	# Enable paging and the write-protect bit.
+	/*------------------------------------------------------
+	Enable paging and the write-protect bit.
+	------------------------------------------------------*/
 	movl %cr0, %ecx
 	orl $0x80010000, %ecx
 	movl %ecx, %cr0
 
-	# Jump to higher half with an absolute jump. 
+	/*------------------------------------------------------
+	Jump to higher half with an absolute jump.
+	------------------------------------------------------*/
 	lea 4f, %ecx
 	jmp *%ecx
 
 .section .text
 
 4:
-	# At this point, paging is fully set up and enabled.
-
-	# Unmap the identity mapping as it is now unnecessary. 
+	/*------------------------------------------------------
+	Unmap identity mapping and flush TLB
+	------------------------------------------------------*/
 	movl $0, boot_page_directory + 0
 
-	# Reload crc3 to force a TLB flush so the changes to take effect.
 	movl %cr3, %ecx
 	movl %ecx, %cr3
 
-	# Set up the stack.
+	/*------------------------------------------------------
+	Setup stack
+	------------------------------------------------------*/
 	mov $stack_top, %esp
 
-	# Enter the high-level kernel.
+	/*------------------------------------------------------
+	push multiboot info struct pointer and bootloader magic
+	number
+	------------------------------------------------------*/
+	push %eax
+	addl $__PAGE_OFFSET, %ebx
+	push %ebx
+
+	/*------------------------------------------------------
+	Enter the high-level kernel
+	------------------------------------------------------*/
 	call kernel_main
 
-	# Infinite loop if the system has nothing more to do.
+	/*------------------------------------------------------
+	Infinit loop if kernel accidentally returns
+	------------------------------------------------------*/
 	cli
 1:	hlt
 	jmp 1b
