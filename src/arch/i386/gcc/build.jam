@@ -45,14 +45,14 @@ obj crtn.o : crtn.S ;
 make crtbegin.o : : @copy_crtbegin ;
 actions copy_crtbegin
 {
-    obj=`i686-elf-gcc -print-file-name=crtbegin.o`
+    obj=`/home/luke/opt/cross/bin/i686-elf-gcc -print-file-name=crtbegin.o`
     cp $obj $(<)
 }
 
 make crtend.o : : @copy_crtend ;
 actions copy_crtend
 {
-    obj=`i686-elf-gcc -print-file-name=crtend.o`
+    obj=`/home/luke/opt/cross/bin/i686-elf-gcc -print-file-name=crtend.o`
     cp $obj $(<)
 }
 

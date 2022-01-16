@@ -6,9 +6,8 @@
 #   GLOBAL CONSTANTS
 #*********************************************************************
 path-constant TOP : . ;
-path-constant ARTFCTS_DIR : ../artifacts ;
-path-constant BUILD_DIR : ../bin ;
-path-constant SYS_ROOT : ../sysroot ;
+path-constant BUILD_DIR : ./bin ;
+path-constant SYS_ROOT : ./sysroot ;
 
 constant SYS_INC_DIR : usr/include ;
 constant SYS_LIB_DIR : usr/lib ;
@@ -54,8 +53,8 @@ project MY_OS
 #*********************************************************************
 #   TARGETS
 #*********************************************************************
-use-project /KERNEL : src/kernel ;
-use-project /LIBC : src/libc ;
+use-project /KERNEL : src ;
+use-project /LIBC : lib/libc ;
 # use-project /ARCH/I386 : src/kernel/arch/i386 ;
 
 alias all

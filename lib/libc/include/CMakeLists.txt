@@ -1,0 +1,9 @@
+set(LIBC_HEADERS
+    sys/cdefs.h
+    assert.h
+    ctype.h
+    feature.h
+    stdio.h
+    stdlib.h
+    string.h
+    )
