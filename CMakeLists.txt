@@ -16,9 +16,9 @@ set(SYS_BOOT_DIR : "${SYS_ROOT}/boot")
 # Use C 11
 set(CMAKE_C_STANDARD 11)
 
-# Add sub-projects
-add_subdirectory(lib/libc)
-add_subdirectory(src) # Must be added after libc.
+# Set install dir to sysroot folder
+set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/sysroot")
+
 
 # Add global compile/link flags
 # TODO: These are gcc specific, so handle as such.
@@ -28,10 +28,14 @@ add_compile_options(
     "-isystem\"${SYS_INC_DIR}\""
     "--sysroot=${SYS_ROOT}"
     )
-
+    
 add_link_options(
     "-ffreestanding"
     "-nostdlib"
     "-lgcc" # Link libgcc to everything
     "--sysroot=${SYS_ROOT}"
     )
+    
+# Add sub-projects
+add_subdirectory(lib/libc)
+add_subdirectory(src) # Must be added after libc.
