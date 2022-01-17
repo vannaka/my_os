@@ -1,7 +1,7 @@
 cmake_minimum_required( VERSION 3.21 )
 
-# Set baremetal x86 toolchain
-set( CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/cmake/toolchains/i686_elf.cmake )
+# Set baremetal x86 gcc toolchain
+set( CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/src/arch/i386/gcc/gcc_x86_toolchain.cmake )
 
 set( CMAKE_SYSTEM_NAME "Generic" )
 set( CMAKE_SYSTEM_VERSION 1.0 )
@@ -22,19 +22,19 @@ set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/sysroot")
 
 # Add global compile/link flags
 # TODO: These are gcc specific, so handle as such.
-add_compile_options(
-    "-ffreestanding"
-    # "-fdump-tree-all-graph" # Dump AST as .dot file. View with graphviz
-    "-isystem\"${SYS_INC_DIR}\""
-    "--sysroot=${SYS_ROOT}"
-    )
+# add_compile_options(
+#     "-ffreestanding"
+#     # "-fdump-tree-all-graph" # Dump AST as .dot file. View with graphviz
+#     "-isystem\"${SYS_INC_DIR}\""
+#     "--sysroot=${SYS_ROOT}"
+#     )
     
-add_link_options(
-    "-ffreestanding"
-    "-nostdlib"
-    "-lgcc" # Link libgcc to everything
-    "--sysroot=${SYS_ROOT}"
-    )
+# add_link_options(
+#     "-ffreestanding"
+#     "-nostdlib"
+#     "-lgcc" # Link libgcc to everything
+#     "--sysroot=${SYS_ROOT}"
+#     )
     
 # Add sub-projects
 add_subdirectory(lib/libc)

@@ -1,18 +1,12 @@
-execute_process(
-    COMMAND echo 
-        ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_<CONFIG>} -print-file-name=crtbegin.o 
-    OUTPUT_VARIABLE CRTBEGIN_PATH
-    )
+# add_library(CRTI_OBJ OBJECT "crti.S")
+# add_library(CRTN_OBJ OBJECT "crtn.S")
 
-execute_process(
-    COMMAND echo 
-        ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_<CONFIG>} -print-file-name=crtend.o
-    OUTPUT_VARIABLE CRTEND_PATH
-    )
+# add_dependencies(kernel.elf
+#     CRTI_OBJ CRTN_OBJ
+#     )
 
-target_sources(kernel
-    "crti.S"
-    ${CRTBEGIN_PATH}
-    ${CRTEND_PATH}
-    "crtn.S"
+target_sources(kernel.elf
+    PRIVATE
+        "crti.S"
+        "crtn.S"
     )

@@ -59,7 +59,7 @@ extern void _assert( const char * condition, const char * file, unsigned int lin
         if( !(condition) )                          \
             {                                       \
             _assert( #condition, __FILE__, __LINE__, __func__ ); \
-            }                                       \  
+            }                                       \
         }                                           \
     while(0)
 

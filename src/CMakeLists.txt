@@ -1,20 +1,27 @@
-cmake_minimum_required( VERSION 3.21 )
+cmake_minimum_required(VERSION 3.21)
 
 project("kernel" LANGUAGES C ASM)
 
-add_executable( kernel "" )
+add_executable(kernel.elf "")
 
 # Link with required libraries
-target_link_libraries( kernel
+target_link_libraries(kernel.elf
     libk
     )
 
-target_include_directories( kernel
+# Add include dir to kernel target
+target_include_directories(kernel.elf
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include"
     )
 
-target_compile_definitions(kernel
+# Add include dir to all targets in this list file 
+#   and any descendents added with add_subdirectory
+# include_directories(
+#     "${CMAKE_CURRENT_LIST_DIR}/include"
+#     )
+
+target_compile_definitions(kernel.elf
     PRIVATE    
         "__is_kernel"
     )

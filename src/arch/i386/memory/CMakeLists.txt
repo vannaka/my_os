@@ -1,4 +1,4 @@
-target_sources(kernel
+target_sources(kernel.elf
     PRIVATE
         "gdt/gdt_asm.S"
         "gdt/gdt.c"

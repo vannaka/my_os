@@ -28,6 +28,29 @@ set(CMAKE_C_FLAGS_RELEASE           "-Os -DNDEBUG" CACHE INTERNAL "")
 set(CMAKE_CXX_FLAGS_DEBUG           "${CMAKE_C_FLAGS_DEBUG}" CACHE INTERNAL "")
 set(CMAKE_CXX_FLAGS_RELEASE         "${CMAKE_C_FLAGS_RELEASE}" CACHE INTERNAL "")
 
+set(CMAKE_EXE_LINKER_FLAGS          "-nostdlib -nostdinc -lgcc" )
+
+# Find crtbegin.o and crtend.o
+execute_process(
+    COMMAND 
+        ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} -print-file-name=crtbegin.o
+    OUTPUT_VARIABLE CRTBEGIN_OBJ
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    
+execute_process(
+    COMMAND 
+        ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} -print-file-name=crtend.o
+    OUTPUT_VARIABLE CRTEND_OBJ
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+# Object 'crtbegin.o' will be linked before all other objects.
+# Object 'crtend.o' will be linked after all other objects.
+SET(CMAKE_C_LINK_EXECUTABLE 
+    "<CMAKE_C_COMPILER> <FLAGS> <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> ${CRTBEGIN_OBJ} <OBJECTS> ${CRTEND_OBJ} -o <TARGET> <LINK_LIBRARIES>"
+    )
+
 # search programs in the host environment
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 
