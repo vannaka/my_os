@@ -1,0 +1,52 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) Launch Kernel",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/src/kernel.elf",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "targetArchitecture": "x86",
+            "MIMode": "gdb",
+            "customLaunchSetupCommands": [
+                {
+                    "text": "target remote localhost:1234",
+                    "description": "Connect to QEMU remote debugger"
+                }
+            ],
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor att",
+                    "ignoreFailures": true
+                },
+                {
+                    "text": "file kernel.elf",
+                    "description": "Load kernel binary."
+                },
+                {
+                    "text": "break general_protection_hndlr",
+                    "description": "Break on general protection handler."
+                },
+                {
+                    "text": "break dflt_excep_hndlr",
+                    "description": "Break on default exception handler."
+                }
+            ],
+            // "preLaunchTask": "Launch QEMU"
+        }
+    ]
+}
