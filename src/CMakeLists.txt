@@ -7,6 +7,7 @@ add_executable(kernel.elf "")
 # Link with required libraries
 target_link_libraries(kernel.elf
     libk
+    utils
     )
 
 # Add include dir to kernel target

@@ -38,4 +38,5 @@ set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/sysroot")
     
 # Add sub-projects
 add_subdirectory(lib/libc)
+add_subdirectory(lib/utils)
 add_subdirectory(src) # Must be added after libc.
