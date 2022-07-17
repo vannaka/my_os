@@ -88,6 +88,12 @@ static struct page_frame *
                               PROCEDURES
 --------------------------------------------------------------------*/
 
+void page_frame_reserve
+    (
+    uint32_t            page_frame,
+    uint32_t            cnt
+    );
+
 
 /*********************************************************************
 *
@@ -106,6 +112,12 @@ void page_frame_pwrp
     )
     {
     /*------------------------------------------------------
+    Local Variables
+    ------------------------------------------------------*/
+    uint32_t pgs_in_system = ( ram_sz + PAGE_SIZE - 1 ) >> PAGE_SHIFT;
+    uint32_t page_frames_sz = pgs_in_system * sizeof( struct page_frame );
+
+    /*------------------------------------------------------
     Validate input
     ------------------------------------------------------*/
     assert( (ram_sz & PAGE_MASK) == 0 );
@@ -123,11 +135,9 @@ void page_frame_pwrp
     page_frames = (struct page_frame *)ram_base;
 
     /*------------------------------------------------------
-    Mark page_frames as used
-    NOTE: 
-        Page frame zero corresponds to address zero.
+    Mark page_frames[MAX_PAGES] as used
     ------------------------------------------------------*/
-    page_frame_reserve( addr2frame(ram_base), ram_sz >> PAGE_SHIFT );
+    page_frame_reserve( addr2frame(ram_base), ( ( page_frames_sz + PAGE_SIZE - 1 ) >> PAGE_SHIFT ) );
 
     } /* page_frame_pwrp() */
 
@@ -172,8 +182,6 @@ void page_frame_reserve
 *
 *   DESCRIPTION:
 *       Allocate a page frame
-*
-*   TODO: Return page frame number or physical address?
 *
 *********************************************************************/
 struct page_frame * page_frame_alloc

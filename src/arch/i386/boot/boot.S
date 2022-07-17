@@ -57,10 +57,7 @@ stack_bottom:
 stack_top:
 
 /*----------------------------------------------------------
-Preallocate pages used for paging. Don't hard-code addresses
-and assume they are available, as the bootloader might have
-loaded its multiboot structures or modules there. This lets
-the bootloader know it must avoid the addresses.
+Preallocate pages used for paging.
 ----------------------------------------------------------*/
 .section .bss, "aw", @nobits
 	.align 4096
@@ -176,7 +173,7 @@ _start:
 	/*------------------------------------------------------
 	Unmap identity mapping and flush TLB
 	------------------------------------------------------*/
-	movl $0, boot_page_directory + 0
+	movl $0, pg_dir_entry( 0 )
 
 	movl %cr3, %ecx
 	movl %ecx, %cr3
