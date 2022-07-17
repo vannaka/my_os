@@ -15,22 +15,25 @@ target_include_directories(kernel.elf
         "${CMAKE_CURRENT_LIST_DIR}/include"
     )
 
-# Add include dir to all targets in this list file 
-#   and any descendents added with add_subdirectory
-# include_directories(
-#     "${CMAKE_CURRENT_LIST_DIR}/include"
-#     )
-
 target_compile_definitions(kernel.elf
     PRIVATE    
-        "__is_kernel"
+        __is_kernel
     )
 
-add_subdirectory(kernel)
+#-----------------------------------------------------------
+# Kernel sources
+#-----------------------------------------------------------
+target_sources(kernel.elf
+    PRIVATE
+        kernel/kernel.c
+        kernel/interrupts/intc.c
+    )
 
-# Add appropriate arch directory
+#-----------------------------------------------------------
+# Arch sources
+#-----------------------------------------------------------
 if( CMAKE_SYSTEM_PROCESSOR MATCHES "x86" )
     add_subdirectory(arch/i386)
 else()
-    message(FATAL_ERROR "Arch ${CMAKE_SYSTEM_PROCESSOR} not supported")
+    message(FATAL_ERROR "Target arch \"${CMAKE_SYSTEM_PROCESSOR}\" not supported!")
 endif()

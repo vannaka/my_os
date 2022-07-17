@@ -16,14 +16,37 @@ target_include_directories(kernel.elf
         "${CMAKE_CURRENT_LIST_DIR}/include/interrupts" # Needed for "interrupts_arch.h". TODO: Think about this more.
     )
 
-# Add include dir to all targets in this list file 
-#   and any descendents added with add_subdirectory
-# include_directories(
-#     "${CMAKE_CURRENT_LIST_DIR}/include"
-#     )
+target_sources(kernel.elf
+    PRIVATE
+        boot/boot.S
+        interrupts/idt/idt_asm.S
+        interrupts/idt/idt.c
+        interrupts/controller/intc_arch.c
+        interrupts/controller/pic/pic.c
+        interrupts/handlers/intr_handlers.c
+        memory/gdt/gdt_asm.S
+        memory/gdt/gdt.c
+        memory/memory.c
+        tty/tty.c
+    )
 
-add_subdirectory(boot)
-add_subdirectory(interrupts)
-add_subdirectory(memory)
-add_subdirectory(tty)
-add_subdirectory(gcc)
+#-----------------------------------------------------------
+# Since GCC doesn’t preserve SSE, MMX nor x87 states,
+#   the GCC option -mgeneral-regs-only should be used
+#   to compile interrupt and exception handlers.
+#-----------------------------------------------------------
+set_source_files_properties( interrupts/handlers/intr_handlers.c
+    TARGET_DIRECTORY
+        kernel.elf
+    PROPERTIES
+        COMPILE_FLAGS -mgeneral-regs-only
+    )
+
+#-----------------------------------------------------------
+# Arch + Toolchain specific sources
+#-----------------------------------------------------------
+if( CMAKE_C_COMPILER_ID MATCHES "GNU" )
+    add_subdirectory(gcc)
+else()
+    message(FATAL_ERROR "Toolchain \"${CMAKE_C_COMPILER_ID}\" not supported!")
+endif()

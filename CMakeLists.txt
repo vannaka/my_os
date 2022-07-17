@@ -1,10 +1,10 @@
-cmake_minimum_required( VERSION 3.21 )
+cmake_minimum_required(VERSION 3.21)
 
 # Set baremetal x86 gcc toolchain
-set( CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/src/arch/i386/gcc/gcc_x86_toolchain.cmake )
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/src/arch/i386/gcc/gcc_x86_toolchain.cmake)
 
-set( CMAKE_SYSTEM_NAME "Generic" )
-set( CMAKE_SYSTEM_VERSION 1.0 )
+set(CMAKE_SYSTEM_NAME "Generic")
+set(CMAKE_SYSTEM_VERSION 1.0 )
 
 project("MyOS" LANGUAGES C ASM)
 
@@ -14,7 +14,7 @@ set(SYS_LIB_DIR : "${SYS_ROOT}/usr/lib")
 set(SYS_BOOT_DIR : "${SYS_ROOT}/boot")
 
 # Use C 11
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 23)
 
 # Set install dir to sysroot folder
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/sysroot")
