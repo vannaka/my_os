@@ -19,12 +19,12 @@ add_library(libk STATIC "")
 
 target_compile_definitions(libc
     PRIVATE
-        -D__is_libc
+        __is_libc
     )
 
 target_compile_definitions(libk
     PRIVATE
-        -D__is_libk
+        __is_libk
     )
 
 #-----------------------------------------------------------
@@ -85,7 +85,7 @@ target_include_directories(libk
         ${CMN_INC_DIRS}
     PRIVATE
         # Need kernel headers for putchar()
-        "${CMAKE_SOURCE_DIR}/src/include" # TODO: Is this the best way of adding the kernel include dir?
+        ${CMAKE_SOURCE_DIR}/src/include # TODO: Is this the best way of adding the kernel include dir?
     )
 
 #-----------------------------------------------------------

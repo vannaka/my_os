@@ -7,18 +7,27 @@ set(CMAKE_SYSTEM_VERSION        "1.0")
 # Without that flag CMake is not able to pass test compilation check
 set(CMAKE_TRY_COMPILE_TARGET_TYPE   STATIC_LIBRARY)
 
-# This should be set on the command line
-set( MY_OS_TOOLCHAIN_PATH /home/luke/opt/cross/bin/ )
+# This should be set on the command line w/ -D flag
+set( MY_OS_TOOLCHAIN_PATH "" CACHE PATH "" )
 
-set(CMAKE_AR                        ${MY_OS_TOOLCHAIN_PATH}i686-elf-ar${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
-set(CMAKE_ASM_COMPILER              ${MY_OS_TOOLCHAIN_PATH}i686-elf-gcc${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
-set(CMAKE_C_COMPILER                ${MY_OS_TOOLCHAIN_PATH}i686-elf-gcc${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
-set(CMAKE_CXX_COMPILER              ${MY_OS_TOOLCHAIN_PATH}i686-elf-g++${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
-set(CMAKE_LINKER                    ${MY_OS_TOOLCHAIN_PATH}i686-elf-ld${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
-set(CMAKE_OBJCOPY                   ${MY_OS_TOOLCHAIN_PATH}i686-elf-objcopy${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
-set(CMAKE_RANLIB                    ${MY_OS_TOOLCHAIN_PATH}i686-elf-ranlib${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
-set(CMAKE_SIZE                      ${MY_OS_TOOLCHAIN_PATH}i686-elf-size${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
-set(CMAKE_STRIP                     ${MY_OS_TOOLCHAIN_PATH}i686-elf-strip${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
+if(EXISTS "${MY_OS_TOOLCHAIN_PATH}" AND IS_DIRECTORY "${MY_OS_TOOLCHAIN_PATH}")
+    set( toolchain_dir "${MY_OS_TOOLCHAIN_PATH}/" )
+elseif( "${MY_OS_TOOLCHAIN_PATH}" STREQUAL "" )
+    # Hopefully the toolchain is on the path
+    set( toolchain_dir "" )
+else()
+    message(FATAL_ERROR "Path given in MY_OS_TOOLCHAIN_PATH does not exist! - ${MY_OS_TOOLCHAIN_PATH}")
+endif()
+
+set(CMAKE_AR                        ${toolchain_dir}i686-elf-ar${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
+set(CMAKE_ASM_COMPILER              ${toolchain_dir}i686-elf-gcc${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
+set(CMAKE_C_COMPILER                ${toolchain_dir}i686-elf-gcc${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
+set(CMAKE_CXX_COMPILER              ${toolchain_dir}i686-elf-g++${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
+set(CMAKE_LINKER                    ${toolchain_dir}i686-elf-ld${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
+set(CMAKE_OBJCOPY                   ${toolchain_dir}i686-elf-objcopy${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
+set(CMAKE_RANLIB                    ${toolchain_dir}i686-elf-ranlib${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
+set(CMAKE_SIZE                      ${toolchain_dir}i686-elf-size${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
+set(CMAKE_STRIP                     ${toolchain_dir}i686-elf-strip${CMAKE_EXECUTABLE_SUFFIX} CACHE INTERNAL "")
 
 set(CMAKE_C_FLAGS                   "-ffreestanding" CACHE INTERNAL "")
 set(CMAKE_CXX_FLAGS                 "${CMAKE_C_FLAGS} -fno-exceptions" CACHE INTERNAL "")

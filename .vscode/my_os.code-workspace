@@ -5,5 +5,11 @@
 			"name": "my_os"
 		},
 	],
-	"settings": {}
+	"settings": {
+		"cmake.sourceDirectory": "${workspaceFolder}/.",
+		"cmake.buildDirectory": "${workspaceFolder}/build",
+		"cmake.configureSettings": {
+			"MY_OS_TOOLCHAIN_PATH": "/home/luke/opt/cross/bin"
+		}
+	}
 }

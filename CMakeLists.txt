@@ -17,7 +17,7 @@ set(SYS_BOOT_DIR : "${SYS_ROOT}/boot")
 set(CMAKE_C_STANDARD 23)
 
 # Set install dir to sysroot folder
-set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/sysroot")
+set(CMAKE_INSTALL_PREFIX ${SYS_ROOT})
 
 
 # Add global compile/link flags
