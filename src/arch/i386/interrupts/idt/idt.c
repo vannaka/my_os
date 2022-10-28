@@ -16,7 +16,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <kernel/types.h>
+#include <kernel/utils.h>
 
 #include <interrupts/idt/idt.h>
 

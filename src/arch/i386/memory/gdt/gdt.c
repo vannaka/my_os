@@ -15,7 +15,7 @@
 #include <assert.h>
 #include <stdint.h>
 
-#include <kernel/types.h>
+#include <kernel/utils.h>
 
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
@@ -140,7 +140,7 @@ const struct desc_struct gdt[] =
     [3] = GDT_ENTRY_INIT( FLAGS_CODE_USER,   0x0, 0xFFFFFFFF ),
     [4] = GDT_ENTRY_INIT( FLAGS_DATA_USER,   0x0, 0xFFFFFFFF )
     };
-static_assert( CNT_OF_ARRAY(gdt) == GDT_ENTRIES, "Too many or not enough GDT entries." );
+static_assert( cnt_of_array(gdt) == GDT_ENTRIES, "Too many or not enough GDT entries." );
 
 struct desc_ptr gdt_ptr =
     {

@@ -19,7 +19,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <kernel/types.h>
+#include <kernel/utils.h>
 
 #include <bit_array.h>
 
@@ -45,9 +45,9 @@ enum page_frame_flags
     __PAGE_FRAME_FLAGS__ALLOCATED = 1,
     __PAGE_FRAME_FLAGS__RESERVED,
 
-    // PAGE_FRAME_FLAGS__FREE        = 1ULL << __PAGE_FRAME_FLAGS__FREE,
-    PAGE_FRAME_FLAGS__ALLOCATED   = 1ULL << __PAGE_FRAME_FLAGS__ALLOCATED,
-    PAGE_FRAME_FLAGS__RESERVED    = 1ULL << __PAGE_FRAME_FLAGS__RESERVED
+    // PAGE_FRAME_FLAGS__FREE        = set_bit( __PAGE_FRAME_FLAGS__FREE ),
+    PAGE_FRAME_FLAGS__ALLOCATED   = set_bit( __PAGE_FRAME_FLAGS__ALLOCATED ),
+    PAGE_FRAME_FLAGS__RESERVED    = set_bit( __PAGE_FRAME_FLAGS__RESERVED )
     };
 
 struct page_frame
@@ -55,6 +55,12 @@ struct page_frame
     enum page_frame_flags
                         flags;
     uintptr_t           p_addr;     /* Physical address     */
+    };
+
+struct page_frame_stats
+    {
+    uint32_t            max_pages;
+    uint32_t            used_pages;
     };
 
 /*--------------------------------------------------------------------
@@ -76,13 +82,16 @@ struct page_frame
                               VARIABLES
 --------------------------------------------------------------------*/
 
-static BA_CREATE32( used_pages, MAX_PAGES );
+// static BA_CREATE32( used_pages, MAX_PAGES );
+static uint32_t *       used_pages;
                                     /* Bit array of used pages      */
 static uint32_t         last_alloc_frame;
                                     /* Last allocated frame         */
-
 static struct page_frame * 
                         page_frames;/* Array of page frames         */ 
+static struct page_frame_stats
+                        page_frame_stats;
+                                    /* Stats of phys mem allocator  */
 
 /*--------------------------------------------------------------------
                               PROCEDURES
@@ -114,8 +123,19 @@ void page_frame_pwrp
     /*------------------------------------------------------
     Local Variables
     ------------------------------------------------------*/
-    uint32_t pgs_in_system = ( ram_sz + PAGE_SIZE - 1 ) >> PAGE_SHIFT;
-    uint32_t page_frames_sz = pgs_in_system * sizeof( struct page_frame );
+    uint32_t            pgs_in_system;
+                                    /* Num of page frames in system */
+    uint32_t            page_frames_sz;
+                                    /* Sz of struct page array      */
+    uint32_t            used_pages_ba_sz;
+                                    /* sz of ba for alloc'd pages   */
+
+    /*------------------------------------------------------
+    Init Local Variables
+    ------------------------------------------------------*/
+    pgs_in_system = ( ram_sz + PAGE_SIZE - 1 ) >> PAGE_SHIFT;
+    page_frames_sz = pgs_in_system * sizeof( struct page_frame );
+    used_pages_ba_sz = 0;
 
     /*------------------------------------------------------
     Validate input
@@ -126,9 +146,16 @@ void page_frame_pwrp
     /*------------------------------------------------------
     Init module variables
     ------------------------------------------------------*/
-    memset( used_pages, 0x0, sizeof( used_pages ) );
     last_alloc_frame = 0;
+    memset( &page_frame_stats, 0, sizeof(page_frame_stats) );
 
+    page_frame_stats.max_pages = pgs_in_system;
+
+    /*------------------------------------------------------
+    Alloc bit-array for used pages
+    ------------------------------------------------------*/
+    used_pages = (uint32_t *)ram_base;
+    
     /*------------------------------------------------------
     Allocate page frame structures
     ------------------------------------------------------*/
@@ -215,7 +242,7 @@ struct page_frame * page_frame_alloc
     Search for a free page, starting at last alloc'd page
     frame.
     ------------------------------------------------------*/
-    for( i = idx; i < CNT_OF_ARRAY( used_pages ); i++ )
+    for( i = idx; i < cnt_of_array( used_pages ); i++ )
         {
         /*--------------------------------------------------
         No free pages at this index. I.e. all bits are set.
@@ -250,7 +277,7 @@ struct page_frame * page_frame_alloc
     /*------------------------------------------------------
     Out of pages
     ------------------------------------------------------*/
-    if( ( i >= CNT_OF_ARRAY( used_pages ) )
+    if( ( i >= cnt_of_array( used_pages ) )
      || ( j >= BA_WIDTH( used_pages )     ) )
         {
         assert( false );

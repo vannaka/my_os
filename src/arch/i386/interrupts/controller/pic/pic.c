@@ -15,7 +15,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <kernel/types.h>
+#include <kernel/utils.h>
 #include <kernel/interrupts/intc_types.h>
 
 #include <interrupts/controller/pic/pic.h>
@@ -70,7 +70,7 @@ Initialization Command Words
 /*--------------------------------------------------------------------
                            MEMORY CONSTANTS
 --------------------------------------------------------------------*/
-const uint32_t   pic_irq_hndlr_cnt = CNT_OF_ARRAY( pic_irq_hndlrs );
+const uint32_t   pic_irq_hndlr_cnt = cnt_of_array( pic_irq_hndlrs );
                                     /* The count of hndlers array   */
 
 /*--------------------------------------------------------------------

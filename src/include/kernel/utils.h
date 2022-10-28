@@ -39,11 +39,13 @@ extern "C" {
                                 MACROS
 --------------------------------------------------------------------*/
 
-#define CNT_OF_ARRAY(x) (sizeof(x)/sizeof(*x))
+#define cnt_of_array(x) (sizeof(x)/sizeof(*x))
 
-#define set_bit(x,y) ((x) |= (1ULL << (y)))
-#define clear_bit(x,y) ((x) &= ~(1ULL << (y)))
-#define is_bit_set(x,y) ((x) & (1ULL << (y)))
+#define clr_array(x) ( memset( x, 0, sizeof(x) ) )
+
+#define set_bit(y) ( (1ULL << (y)) )
+#define clear_bit(y) ( ~(set_bit(y)) )
+#define test_bit(x,y) ( (x) & set_bit(y) )
 
 /*--------------------------------------------------------------------
                               PROCEDURES
