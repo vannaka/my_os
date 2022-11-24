@@ -10,7 +10,20 @@
                 "cwd": "${workspaceFolder}/build/src/",
             },
             "windows": {
-                "command": "start -FilePath 'qemu-system-i386' -ArgumentList '-S -gdb tcp::1234-kernel kernel.elf -m 512'"
+                "command": "start -FilePath 'qemu-system-i386' -ArgumentList '-kernel kernel.elf -m 512'"
+            },
+            "linux": {
+                "command": "qemu-system-i386 -kernel kernel.elf -m 512"
+            }
+        },
+        {
+            "label": "Launch QEMU (Debug)",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/build/src/",
+            },
+            "windows": {
+                "command": "start -FilePath 'qemu-system-i386' -ArgumentList '-S -gdb tcp::1234 -kernel kernel.elf -m 512'"
             },
             "linux": {
                 "command": "qemu-system-i386 -S -gdb tcp::1234 -kernel kernel.elf -m 512"

@@ -128,8 +128,8 @@ _start:
 	movl $(0x000B8000 | 0x003), pa(boot_page_table1) + 1023 * 4
 
 	# The page table is used at both page directory entry 0 (virtually from 0x0
-	# to 0x3FFFFF) (thus identity mapping the kernel) and page directory entry
-	# 768 (virtually from 0xC0000000 to 0xC03FFFFF) (thus mapping it in the
+	# to 0x003F_FFFF) (thus identity mapping the kernel) and page directory entry
+	# 768 (virtually from 0xC000_0000 to 0xC03F_FFFF) (thus mapping it in the
 	# higher half). The kernel is identity mapped because enabling paging does
 	# not change the next instruction, which continues to be physical. The CPU
 	# would instead page fault if there was no identity mapping.

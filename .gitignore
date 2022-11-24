@@ -1,6 +1,6 @@
-
 bin/
-
 build/
-
 sysroot/
+tools/toolchain/build/
+tools/toolchain/downloads/
+tools/toolchain/local/
