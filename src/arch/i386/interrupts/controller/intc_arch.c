@@ -46,13 +46,13 @@
 /*********************************************************************
 *
 *   PROCEDURE NAME:
-*       intc_install_low_level_driver
+*       install_pic_driver
 *
 *   DESCRIPTION:
-*       Install the low level interrupt controller driver
+*       Install the low level PIC driver
 *
 *********************************************************************/
-void intc_install_low_level_driver
+void install_pic_driver
     (
     struct intc_cnfg *  cnfg,
     struct irq_hndlr_type **   
@@ -70,5 +70,33 @@ void intc_install_low_level_driver
 
     *irq_hndlrs = pic_irq_hndlrs;
     *irq_hndlrs_cnt = pic_irq_hndlr_cnt;
+
+    } /* install_pic_driver() */
+
+
+/*********************************************************************
+*
+*   PROCEDURE NAME:
+*       intc_install_low_level_driver
+*
+*   DESCRIPTION:
+*       Install the low level interrupt controller driver
+*
+*********************************************************************/
+void intc_install_low_level_driver
+    (
+    struct intc_cnfg *  cnfg,
+    struct irq_hndlr_type **   
+                        irq_hndlrs,
+    uint32_t *          irq_hndlrs_cnt
+    )
+    {
+    /*------------------------------------------------------
+    Install low level driver
+
+    TODO:LMM: Once APIC is supported, add logic here to
+    install its driver instead.
+    ------------------------------------------------------*/
+    install_pic_driver(cnfg, irq_hndlrs, irq_hndlrs_cnt);
 
     } /* intc_install_low_level_driver() */

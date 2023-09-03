@@ -15,7 +15,6 @@
                                INCLUDES
 --------------------------------------------------------------------*/
 
-#include <stdbool.h>
 #include <stdint.h>
 
 #include "intc_types.h"

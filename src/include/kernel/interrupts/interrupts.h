@@ -48,7 +48,7 @@ extern "C" {
 /*------------------------------------------------------
 Architecture defines this to setup interrupts
 ------------------------------------------------------*/
-void interrupt_init
+void idt_init
     (
     void
     );

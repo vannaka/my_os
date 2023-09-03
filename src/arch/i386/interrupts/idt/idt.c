@@ -17,8 +17,10 @@
 #include <stdint.h>
 
 #include <kernel/types.h>
+#include <kernel/interrupts/intc.h>
 
 #include <interrupts/idt/idt.h>
+#include <memory/mmu.h>
 
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
@@ -50,23 +52,20 @@ Gate types
 #define INTR_GATE_32 0xE
 #define TRAP_GATE_32 0xF
 
-#define INTR_DFLT_FLAGS \
-    ( PRES( 1 ) | PRIV( RING0 ) | SEGM( 0 ) | INTR_GATE_32 )
-
 /*--------------------------------------------------------------------
                                 TYPES
 --------------------------------------------------------------------*/
 
 struct desc_struct
     {
-    uint16_t            offset0;    /* Offset bits 0..15            */
+    uint16_t            off_15_0;   /* Offset bits 0..15            */
     uint16_t            selector;   /* A code seg selector in GDT   */
     uint8_t             pad0;       /* Unused - Set to zero         */
     uint8_t             type: 4,    /* Gate type                    */
                         s: 1,       /* Storage segment              */
                         dpl: 2,     /* Privilege - Ring level       */
                         p: 1;       /* Present?                     */
-    uint16_t            offset1;    /* Offset bits 16..31           */
+    uint16_t            off_31_16;  /* Offset bits 16..31           */
     } __attribute__((packed));
 
 struct desc_ptr 
@@ -80,6 +79,36 @@ struct desc_ptr
                                 MACROS
 --------------------------------------------------------------------*/
 
+
+/*********************************************************************
+*
+*   PROCEDURE NAME:
+*       set_descriptor
+*
+*   DESCRIPTION:
+*       Set up a normal interrupt/trap gate descriptor.
+*     
+*     - istrap: 1 for a trap (= exception) gate, 0 for an interrupt gate.
+*       interrupt gate clears FL_IF, trap gate leaves FL_IF alone
+*     - sel: Code segment selector for interrupt/trap handler
+*     - off: Offset in code segment for interrupt/trap handler
+*     - ring: Descriptor Privilege Level -
+*            the privilege level required for software to invoke
+*            this interrupt/trap gate explicitly using an int instruction.
+*
+*********************************************************************/
+#define set_descriptor(gate, istrap, sel, off, ring)      \
+{                                                         \
+  (gate).off_15_0 = (uint32_t)(off) & 0xffff;             \
+  (gate).selector = (sel);                                \
+  (gate).pad0 = 0;                                        \
+  (gate).type = (istrap) ? TRAP_GATE_32 : INTR_GATE_32;   \
+  (gate).s = 0;                                           \
+  (gate).dpl = (ring);                                    \
+  (gate).p = 1;                                           \
+  (gate).off_31_16 = (uint32_t)(off) >> 16;               \
+}
+
 /*--------------------------------------------------------------------
                            MEMORY CONSTANTS
 --------------------------------------------------------------------*/
@@ -88,8 +117,6 @@ struct desc_ptr
                               VARIABLES
 --------------------------------------------------------------------*/
 
-// TODO:LMM: Does the IDT need to be aligned?
-// __attribute__((aligned(0x1000)))
 static struct desc_struct idt[ MAX_IDT_ENTRIES ];
 
 static struct desc_ptr idt_ptr =
@@ -108,48 +135,27 @@ extern void do_install_idt
     struct desc_ptr *
     );
 
-void install_interrupt
-    (
-    enum intr_vector_num_t   
-                        idx,
-    void *              hndlr,
-    uint8_t             flags
-    );
-
 
 /*********************************************************************
 *
 *   PROCEDURE NAME:
-*       interrupt_init
+*       idt_init
 *
 *   DESCRIPTION:
-*       Initialize interrupts
+*       Initialize iterrupt descriptor table
 *
 *********************************************************************/
-void interrupt_init
+void idt_init
     (
     void
     )
     {
     /*------------------------------------------------------
-    Setup Default handlers
+    Setup low level vector handlers
     ------------------------------------------------------*/
     for( int i = 0; i < MAX_IDT_ENTRIES; i++ )
         {
-        install_interrupt( i, dflt_intr_hndlr, INTR_DFLT_FLAGS );
-        }
-
-    /*------------------------------------------------------
-    Setup exception handlers
-    ------------------------------------------------------*/
-    install_interrupt( INT_NUM__GEN_PROT_FAULT, general_protection_hndlr, INTR_DFLT_FLAGS );
-
-    /*------------------------------------------------------
-    Setup irq handler
-    ------------------------------------------------------*/
-    for( int i = IRQ_NUM__FIRST; i < IRQ_NUM__LAST; i++ )
-        {
-        install_interrupt( i, intc_intr_hndlr, INTR_DFLT_FLAGS );
+        set_descriptor( idt[i], false, SEG_KCODE<<3, vector_table[i], RING0 );
         }
 
     /*------------------------------------------------------
@@ -157,57 +163,39 @@ void interrupt_init
     ------------------------------------------------------*/
     do_install_idt( &idt_ptr );
 
-    } /* interrupt_init() */
+    } /* idt_init() */
 
 
 /*********************************************************************
 *
 *   PROCEDURE NAME:
-*       install_interrupt
+*       vector_common_hi
 *
 *   DESCRIPTION:
-*       Install handler into the IDT
+*       All 256 exception vectors are sent here after the assembly
+*       routines setup the exception frame.
 *
 *********************************************************************/
-void install_interrupt
+void vector_common_hi
     (
-    enum intr_vector_num_t   
-                        idx,
-    void *              hndlr,
-    uint8_t             flags
+    struct exception_frame *frame
     )
     {
-    /*------------------------------------------------------
-    Local Variables
-    ------------------------------------------------------*/
-    uint16_t hndl_lo;
-    uint16_t hndl_hi;
-
-    /*------------------------------------------------------
-    Validate inputs
-    ------------------------------------------------------*/
-    if( idx >= MAX_IDT_ENTRIES )
+    
+    if(INT_NUM__GEN_PROT_FAULT == frame->vec_num)
         {
-        assert( true );
-        return;
+        general_protection_hndlr(frame);
         }
-
-    /*------------------------------------------------------
-    Get the low/high bytes of handler
-    ------------------------------------------------------*/
-    hndl_lo = (uint32_t)hndlr & 0xFFFF;
-    hndl_hi = ( (uint32_t)hndlr >> 16 ) & 0xFFFF;
-
-    /*------------------------------------------------------
-    Install handler
-    ------------------------------------------------------*/                                         
-    idt[ idx ].offset0  = hndl_lo;
-    idt[ idx ].offset1  = hndl_hi;
-    idt[ idx ].selector = (uint16_t)(0x8); // TODO:LMM Replace with define
-    idt[ idx ].pad0     = 0x0;
-    idt[ idx ].type     = ((flags) & 0x0F);
-    idt[ idx ].s        = ((flags) >> 4) & 0x01;
-    idt[ idx ].dpl      = ((flags) >> 5) & 0x03;
-    idt[ idx ].p        = ((flags) >> 7) & 0x01;
-
-    } /* install_interrupt() */
+    else if( ( IRQ_NUM__FIRST <= frame->vec_num )
+          && ( IRQ_NUM__LAST  >= frame->vec_num ) )
+        {
+        /*--------------------------------------------------
+        Call generic interrupt controller handler
+        --------------------------------------------------*/
+        intc_hndlr( IRQ_NUM__FIRST - frame->vec_num );
+        }
+    else
+        {
+        dflt_excep_hndlr(frame);
+        }
+    }

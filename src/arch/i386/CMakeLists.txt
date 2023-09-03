@@ -19,11 +19,12 @@ target_include_directories(kernel.elf
 target_sources(kernel.elf
     PRIVATE
         boot/boot.S
-        interrupts/idt/idt_asm.S
-        interrupts/idt/idt.c
         interrupts/controller/intc_arch.c
         interrupts/controller/pic/pic.c
-        interrupts/handlers/intr_handlers.c
+        interrupts/idt/excpt_hndlrs.c
+        interrupts/idt/idt.c
+        interrupts/idt/idt_asm.S
+        interrupts/idt/vectors.S
         memory/gdt/gdt_asm.S
         memory/gdt/gdt.c
         memory/memory.c

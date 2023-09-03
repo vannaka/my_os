@@ -50,25 +50,6 @@
                               PROCEDURES
 --------------------------------------------------------------------*/
 
-/*********************************************************************
-*
-*   PROCEDURE NAME:
-*       dflt_intr_hndlr
-*
-*   DESCRIPTION:
-*       The default interrupt handler
-*
-*********************************************************************/
-__attribute__((interrupt))
-void dflt_intr_hndlr
-    (
-    struct interrupt_frame * 
-                        frame
-    )
-    {
-    printf("\nHello from the default interrupt handler!\n");
-    } /* dflt_hndlr() */
-
 
 /*********************************************************************
 *
@@ -79,15 +60,14 @@ void dflt_intr_hndlr
 *       The default exception handler
 *
 *********************************************************************/
-__attribute__((interrupt))
 void dflt_excep_hndlr
     (
-    struct interrupt_frame *
-                        frame,
-    exception_code_t    e_code
+    struct exception_frame *
+                        frame
     )
     {
-
+    assert(false);
+    
     } /* dflt_excep_hndlr() */
 
 
@@ -100,12 +80,10 @@ void dflt_excep_hndlr
 *       The general protection fault exception handler
 *
 *********************************************************************/
-__attribute__((interrupt))
 void general_protection_hndlr
     (
-    struct interrupt_frame *
-                        frame,
-    exception_code_t    e_code
+    struct exception_frame *
+                        frame
     )
     {
     static const char name[][3] = { "GDT", "IDT", "LDT", "IDT" };
@@ -113,20 +91,20 @@ void general_protection_hndlr
     /*------------------------------------------------------
     Fault was caused by bad segment selector
     ------------------------------------------------------*/
-    if( e_code )
+    if( frame->error )
         {
         
-        if( GET_SEL_ERR_E( e_code ) )
+        if( GET_SEL_ERR_E( frame->error ) )
             {
-            printf("GP Fault - External - E_CODE: %x", e_code );
+            printf("GP Fault - External - E_CODE: %x", frame->error );
             }
         else
             {
             printf( 
                 "GP Fault - Selector - Table: %s, Selector: %d, E_CODE: %x", 
-                name[(uint8_t)GET_SEL_ERR_TBL( e_code )], 
-                (uint16_t)GET_SEL_ERR__SEL( e_code ), 
-                e_code 
+                name[(uint8_t)GET_SEL_ERR_TBL( frame->error )], 
+                (uint16_t)GET_SEL_ERR__SEL( frame->error ), 
+                frame->error 
                 );
             }
         }
@@ -135,61 +113,7 @@ void general_protection_hndlr
     ------------------------------------------------------*/
     else
         {
-        printf( "GP Fault - Unknown - E_CODE: %x", e_code );
+        printf( "GP Fault - Unknown - E_CODE: %x", frame->error );
         }
 
     } /* general_protection_hndlr() */
-
-
-/*********************************************************************
-*
-*   PROCEDURE NAME:
-*       intc_intr_hndlr
-*
-*   DESCRIPTION:
-*       Interrupt controller interrupt handler
-*
-*********************************************************************/
-__attribute__((interrupt))
-void intc_intr_hndlr
-    (
-    struct interrupt_frame * 
-                        frame
-    )
-    {
-    /*------------------------------------------------------
-    Local Variables
-    ------------------------------------------------------*/
-    uint16_t            isr;
-    uint32_t            irq;
-
-    /*------------------------------------------------------
-    Read in service register
-    ------------------------------------------------------*/
-    isr = pic_get_isr();
-
-    /*------------------------------------------------------
-    Find set bit
-    ------------------------------------------------------*/
-    for( irq = 0; irq < 16; irq++ )
-        {
-        if( ( isr >> irq ) & 0x1 )
-            {
-            break;
-            }
-        }
-
-    /*------------------------------------------------------
-    Missfire?
-    ------------------------------------------------------*/
-    if( irq == 16 )
-        {
-        return;
-        }
-
-    /*------------------------------------------------------
-    Call high level handler
-    ------------------------------------------------------*/
-    intc_hndlr( irq );
-
-    } /* intc_intr_hndlr() */

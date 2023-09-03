@@ -25,11 +25,41 @@
                                 TYPES
 --------------------------------------------------------------------*/
 
-struct interrupt_frame
+struct exception_frame
     {
-    uint32_t            ip;
-    uint32_t            cs;
-    uint32_t            flags;
+    // registers pushed by pusha
+    uint32_t    edi;
+    uint32_t    esi;
+    uint32_t    ebp;
+    uint32_t    old_esp; // Value b4 pusha executed
+    uint32_t    ebx;
+    uint32_t    edx;
+    uint32_t    ecx;
+    uint32_t    eax;
+
+    // Segment selectors and vector number
+    uint16_t    gs;
+    uint16_t    pad1;
+    uint16_t    fs;
+    uint16_t    pad2;
+    uint16_t    es;
+    uint16_t    pad3;
+    uint16_t    ds;
+    uint16_t    pad4;
+    uint32_t    vec_num;
+
+    // Below here pushed by x86 hardware
+    uint32_t    error;
+    uint32_t    eip;
+    uint16_t    cs;
+    uint16_t    pad5;
+    uint32_t    eflags;
+    
+    // Below here only used when crossing rings, i.e. from user to kernel
+    uint32_t    esp;
+    uint16_t    ss;
+    uint16_t    pad6;
+
     } __attribute__((packed));
 
 typedef uint32_t exception_code_t;
@@ -102,6 +132,8 @@ enum intr_vector_num_t
 extern "C" {
 #endif
 
+extern uint32_t vector_table[];  // in vectors.S: array of 256 function pointers
+
 /*--------------------------------------------------------------------
                               VARIABLES
 --------------------------------------------------------------------*/
@@ -114,30 +146,15 @@ extern "C" {
                               PROCEDURES
 --------------------------------------------------------------------*/
 
-
-void dflt_intr_hndlr
-    (
-    struct interrupt_frame * 
-                        frame
-    );
-
 void dflt_excep_hndlr
     (
-    struct interrupt_frame *
-                        frame,
-    exception_code_t    e_code
+    struct exception_frame *
+                        frame
     );
 
 void general_protection_hndlr
     (
-    struct interrupt_frame *
-                        frame,
-    exception_code_t    e_code
-    );
-
-void intc_intr_hndlr
-    (
-    struct interrupt_frame * 
+    struct exception_frame *
                         frame
     );
     

@@ -17,11 +17,11 @@
 
 #include <kernel/types.h>
 
+#include <memory/mmu.h>
+
 /*--------------------------------------------------------------------
                           LITERAL CONSTANTS
 --------------------------------------------------------------------*/
-
-#define GDT_ENTRIES		5
 
 /*----------------------------------------------------------
 Descriptor flags
@@ -135,12 +135,12 @@ __attribute__((aligned(0x1000)))
 const struct desc_struct gdt[] =
     {
     [0] = { 0 },
-    [1] = GDT_ENTRY_INIT( FLAGS_CODE_KERNEL, 0x0, 0xFFFFFFFF ),
-    [2] = GDT_ENTRY_INIT( FLAGS_DATA_KERNEL, 0x0, 0xFFFFFFFF ),
-    [3] = GDT_ENTRY_INIT( FLAGS_CODE_USER,   0x0, 0xFFFFFFFF ),
-    [4] = GDT_ENTRY_INIT( FLAGS_DATA_USER,   0x0, 0xFFFFFFFF )
+    [SEG_KCODE] = GDT_ENTRY_INIT( FLAGS_CODE_KERNEL, 0x0, 0xFFFFFFFF ),
+    [SEG_KDATA] = GDT_ENTRY_INIT( FLAGS_DATA_KERNEL, 0x0, 0xFFFFFFFF ),
+    [SEG_UCODE] = GDT_ENTRY_INIT( FLAGS_CODE_USER,   0x0, 0xFFFFFFFF ),
+    [SEG_UDATA] = GDT_ENTRY_INIT( FLAGS_DATA_USER,   0x0, 0xFFFFFFFF )
     };
-static_assert( CNT_OF_ARRAY(gdt) == GDT_ENTRIES, "Too many or not enough GDT entries." );
+static_assert( CNT_OF_ARRAY(gdt) == SEG_CNT, "Too many or not enough GDT entries." );
 
 struct desc_ptr gdt_ptr =
     {
