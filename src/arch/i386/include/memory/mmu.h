@@ -30,8 +30,15 @@ NOTE: shift left by three to use a selector
 #define SEG_UDATA 4  // user data+stack
 #define SEG_TSS   5  // this process's task state
 
-
 #define SEG_CNT	  5
+
+
+/*----------------------------------------------------------
+Physical memory macros
+----------------------------------------------------------*/
+#define __PAGE_OFFSET 0xC0000000
+#define pa(X) ((X) - __PAGE_OFFSET)
+
 
 #ifndef __ASSEMBLER__
 /*--------------------------------------------------------------------
